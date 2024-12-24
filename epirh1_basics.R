@@ -98,6 +98,7 @@ p_load(
     # Tables for presentation
     knitr,
     flextable,
+    kableExtra,
     # DT,
     # gt,
     # huxtable,

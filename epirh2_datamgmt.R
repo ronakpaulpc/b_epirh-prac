@@ -1514,6 +1514,35 @@ ggplot(data = linelist) +
 
 
 
+#_====
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# C12 - Pivoting data -----------------------------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Here we learn about the conversion of a table from long to wide format
+# or vice versa. 
+# It is useful to be aware of the idea of “tidy data” in which 
+# - each variable has it’s own column, 
+# - each observation has it’s own row, 
+# - and each value has it’s own cell.
+
+
+# 12.1 Preparation --------------------------------------------------------
+
+# ** Load packages ====
+# Here we load packages required for analysis.
+# install.packages("kableExtra")
+library(easypackages)
+libraries(
+    "rio",
+    "here",
+    "kableExtra",
+    "tidyverse"
+)
+
+
+# ** Import data ====
+# First we import the malaria count data.
+count_data <- import(here("data_prac", "malaria_facility_count_data.rds"))
 
 # TBC ####
 
