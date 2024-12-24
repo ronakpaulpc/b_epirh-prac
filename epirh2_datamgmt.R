@@ -1541,8 +1541,34 @@ libraries(
 
 
 # ** Import data ====
-# First we import the malaria count data.
+# First we import the malaria count data, fictional dataset of 
+# daily malaria cases, by facility and age group.
 count_data <- import(here("data_prac", "malaria_facility_count_data.rds"))
+
+# Import the linelist data which are simulated cases of Ebola epidemic.
+linelist <- import(here("data_prac", "linelist_cleaned.rds"))
+
+
+# 12.2 Wide-to-long -------------------------------------------------------
+
+# ** "Wide" format ====
+# In a wide format data a subject’s characteristics or responses are stored 
+# in a single row. While this may be useful for presentation, it is not 
+# ideal for some types of analysis.
+
+# Now we check the malaria count data.
+glimpse(count_data)
+count_data |> view()
+
+# Visualising the total malaria counts over time.
+ggplot(data = count_data, aes(x = data_date, y = malaria_tot)) +
+    geom_col(width = 1)
+
+
+# ** Standard pivoting ====
+
+
+
 
 # TBC ####
 
