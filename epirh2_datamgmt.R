@@ -1559,14 +1559,62 @@ linelist <- import(here("data_prac", "linelist_cleaned.rds"))
 # Now we check the malaria count data.
 glimpse(count_data)
 count_data |> view()
+count_data$data_date |> min()
+count_data$data_date |> max()
 
-# Visualising the total malaria counts over time.
+# Visualising the total malaria counts over time. We can do this with 
+# the current wide format data.
 ggplot(data = count_data, aes(x = data_date, y = malaria_tot)) +
     geom_col(width = 1)
+# However, what if we wanted to display the relative contributions of each 
+# age group to this total count? In this case, we need to ensure that the 
+# variable of interest (age group), appears in the dataset in a single column 
+# that can be passed to {ggplot2}’s “mapping aesthetics” aes() argument.
+
+# We can do so with the tidyr function pivot_longer() makes data “longer”.
 
 
 # ** Standard pivoting ====
+df_long <- count_data |> 
+    pivot_longer(
+        cols = c(`malaria_rdt_0-4`, `malaria_rdt_5-14`, `malaria_rdt_15`, `malaria_tot`)
+    )
+df_long
+# NOTE: The dataset dimensions have changed. Num of rows have increased and 
+# num of columns have decreased.
+dim(count_data)
+dim(df_long)
 
+# Altly, since the names of these four columns all begin with the 
+# prefix malaria_, we could have made use of the handy “tidyselect” 
+# function starts_with() to achieve the same result.
+df_long <- count_data |>
+    pivot_longer(cols = starts_with("malaria_"))
+glimpse(count_data)
+glimpse(df_long)
+# Altly, we could have referred to cols by position.
+count_data |> pivot_longer(cols = 6:9)
+# Altly, we could have referred by named range.
+count_data |> pivot_longer(cols = "malaria_rdt_0-4":"malaria_tot")
+
+# The two new cols are given the default names of name and value, but we can
+# provide more meaningful names, using the names_to and values_to arguments.
+df_long <- count_data |> 
+    pivot_longer(
+        cols = "malaria_rdt_0-4":"malaria_tot",
+        names_to = "age_group",
+        values_to = "counts"
+    )
+df_long
+
+# We can now graph the bar chart by using this new dataset and map the 
+# new col count to the y-axis and new col age_group to the fill = argument.
+ggplot(data = df_long) +
+    geom_col(
+        mapping = aes(x = data_date, y = counts, fill = age_group),
+        width = 1
+    )
+    
 
 
 
