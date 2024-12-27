@@ -1614,7 +1614,24 @@ ggplot(data = df_long) +
         mapping = aes(x = data_date, y = counts, fill = age_group),
         width = 1
     )
-    
+# NOTE: There is something wrong in this plot.
+# We have also included the total counts from the malaria_tot column 
+# so the magnitude of each bar in the plot is twice as high as it should be.
+
+# One way to handle this is to filter the data before plotting.
+df_long |> filter(age_group != "malaria_tot") |> 
+    ggplot(aes(x = data_date, y = counts, fill = age_group)) +
+    geom_col(width = 1)
+# Altly, we could have excluded malaria_tot when we ran pivot_longer.
+count_data |> pivot_longer(
+    cols = "malaria_rdt_0-4":"malaria_rdt_15",
+    names_to = "age_group",
+    values_to = "counts"
+)
+
+
+# ** Pivoting data of multiple classes ====
+
 
 
 
