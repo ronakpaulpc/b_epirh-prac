@@ -1631,7 +1631,61 @@ count_data |> pivot_longer(
 
 
 # ** Pivoting data of multiple classes ====
+# One particularly common problem you will encounter will be the need 
+# to pivot columns that contain different classes of data. This pivot 
+# will result in storing these different data types in a single column
+# which is not a good situation.
+# There is an important step you can take using pivot_longer() 
+# to avoid creating such a situation yourself.
+df <- tribble(
+    ~id,    ~obs1_date,     ~obs1_status,   ~obs2_date,     ~obs2_status,   ~obs3_date,     ~obs3_status,
+    "A",	"2021-04-23",	"Healthy",	    "2021-04-24",	"Healthy",	    "2021-04-25",	"Unwell",
+    "B",	"2021-04-23",	"Healthy",	    "2021-04-24",	"Healthy",	    "2021-04-25",	"Healthy",
+    "C",	"2021-04-23",	"Missing",	    "2021-04-24",	"Healthy",	    "2021-04-25",	"Healthy"
+)
+df
 
+# In order to work with these data, we need to transform the dataframe 
+# to long format, but keeping the separation between a date column and 
+# a character (status) column, for each observation for each item.
+df |> 
+    pivot_longer(
+        cols = -id,
+        names_to = c("observation")
+    )
+# Above, our pivot has merged dates and characters into a single value column.
+# The utility of dates are lost.
+
+# SOL: We can leverage names_sep arg to keep these two data types 
+# in separate columns after the pivot.
+df_long <- df |> 
+    pivot_longer(
+        cols = -id,
+        names_to = c("observation", ".value"),
+        names_sep = "_"
+    )
+df_long
+# We further refine the code to set appropriate column types.
+df_long <- df_long |> 
+    mutate(
+        date = as_date(date),
+        observation = observation |> str_remove_all("obs") |> as.numeric()
+    )
+df_long
+
+# Now, we can work with the data, starting by plotting a heat tile.
+ggplot(data = df_long, mapping = aes(x = date, y = id, fill = status)) +
+    geom_tile(colour = "black") +
+    scale_fill_manual(
+        values = c(
+            "Healthy" = "green",
+            "Unwell" = "red",
+            "Missing" = "grey"
+        )
+    )
+
+
+# 12.3 Long-to-wide -------------------------------------------------------
 
 
 
