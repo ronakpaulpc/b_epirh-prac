@@ -1686,6 +1686,14 @@ ggplot(data = df_long, mapping = aes(x = date, y = id, fill = status)) +
 
 
 # 12.3 Long-to-wide -------------------------------------------------------
+# Sometimes, we may wish to convert a dataset to a wider format. 
+# For this, we can use the pivot_wider() function.
+# CASE: When we want to transform the results of an analysis into a format 
+# which is more digestible for the reader like, a Table for presentation.
+
+
+
+
 
 
 

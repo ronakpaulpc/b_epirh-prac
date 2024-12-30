@@ -163,13 +163,16 @@ get_data("all")
 # C3 - R Basics -----------------------------------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Package for updating R from RStudio in windows
-install.packages("installr")
+# install.packages("installr")
 library(installr)
 
-# Updating R
-updateR()
+# Checking for current R version
 R.Version()                   # check for installed version 
 sessionInfo()                 # checking alternative
+# Checking for updates and updating R
+check.for.updates.R()
+updateR()
+
 
 # Updating Rtools
 install.Rtools()
