@@ -86,6 +86,8 @@ linelist |> tabyl(age_cat, gender)
 
 
 # ** "Adorning" the tabyl ====
+# We can use janitor’s “adorn” functions to add totals or convert to 
+# proportions, percents, or otherwise adjust the display.
 # A simple one-way table with percent instead of the default proportions.
 linelist |> 
     tabyl(age_cat) |> 
@@ -98,7 +100,7 @@ linelist |>
     adorn_percentages(denominator = "row") |> 
     adorn_pct_formatting(digits = 1)
 
-# A cross-tabulation adjusted so that both counts and percent are displayed.
+# A cross-tabulation adjusted so that both counts and percents are displayed.
 linelist |> 
     tabyl(age_cat, gender) |> 
     adorn_totals(where = "row") |> 
@@ -132,16 +134,48 @@ linelist |>
 
 
 # ** Use on other tables ====
-linelist |> 
-    count(hospital) |> 
-    adorn_totals()
+# We can use janitor’s adorn_*() functions on other tables, such as those
+# created by summarise() and count() from dplyr, or table() from base R. 
+linelist |> count(hospital)         # no totals
+linelist |> count(hospital) |>      # dplyr function
+    adorn_totals()                  # adorn function
 
 
 # ** Saving the tabyl ====
+# If you convert the table to a “pretty” image with a package like flextable
+# you can save it with functions from that package.
+linelist |> 
+    tabyl(age_cat, gender) |> 
+    adorn_totals(where = "col") |> 
+    adorn_percentages(denominator = "col") |> 
+    adorn_pct_formatting() |> 
+    adorn_ns(position = "front") |> 
+    adorn_title(
+        row_name = "Age category",
+        col_name = "Gender",
+        placement = "combined"
+    ) |> 
+    flextable() |> 
+    autofit() |> 
+    save_as_docx(path = "sample_tbl_c17.docx")
 
 
+# ** Statistics ====
+# You can apply statistical tests on tabyls, from the stats package. 
+age_by_outcome <- linelist |> 
+    tabyl(age_cat, outcome, show_na = F)
+age_by_outcome
+chisq.test(age_by_outcome)
+# NOTE: Missing values are not allowed so they are excluded from 
+# the tabyl with show_na = FALSE.
 
 
+# ** Other tips ====
+# You can read more detail in the janitor page and this tabyl vignette.
+# NO CODE.
+
+
+# 17.4 dplyr package ------------------------------------------------------
 
 
 
