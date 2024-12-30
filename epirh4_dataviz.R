@@ -1,4 +1,4 @@
-# Practice code from the "Data vizualization" section of the Epi R Handbook
+# Practice code from the "Data visualization" section of the Epi R Handbook
 # We have created the sections as per the handbook
 # NOTE: Section headers can be entered using ctrl+shift+R or manually typed
 # Each section represents one chapter of the handbook

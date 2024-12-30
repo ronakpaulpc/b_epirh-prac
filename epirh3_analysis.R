@@ -15,26 +15,32 @@
 
 
 # 17.1 Preparation --------------------------------------------------------
+
 # ** Load packages ====
-pacman::p_load(
-    rio, 
-    here, 
-    skimr, 
-    tidyverse, 
-    gtsummary, 
-    rstatix, 
-    janitor, 
-    scales, 
-    flextable
+# Here we load the packages required for analysis
+# install.packages(c("rio", "here", "skimr", "tidyverse", "gtsummary", 
+#                    "rstatix", "janitor", "scales", "flextable"))
+library(easypackages)
+libraries(
+    "rio", 
+    "here", 
+    "skimr", 
+    "tidyverse", 
+    "gtsummary", 
+    "rstatix", 
+    "janitor", 
+    "scales", 
+    "flextable"
 )
 
 # ** Import data ====
 linelist <- import(here("data_prac", "linelist_cleaned.rds"))
-head(linelist) |> view()
+head(linelist) |> view(title = "linelist")
 glimpse(linelist)
 
 
 # 17.2 Browse data --------------------------------------------------------
+
 # ** skimr package ====
 # By using the skimr package, you can get a detailed and aesthetically 
 # pleasing overview of each of the vars in your dataset.
@@ -42,6 +48,7 @@ skim(linelist)
 # We can use the base R summary() fn to get info about an entire dataset.
 summary(linelist)
 # NOTE: This output can be more difficult to read than using skimr.
+
 
 # ** Summary statistics ====
 # We can use base R functions to return summary statistics of a numeric col.
@@ -54,14 +61,87 @@ summary(linelist$age_years)[["1st Qu."]]
 # You can use the get_summary_stats() function from rstatix to return 
 # summary statistics in a dataframe format. This can be helpful for 
 # performing subsequent operations or plotting on the numbers.
-linelist |> 
-    get_summary_stats(
+linelist |> get_summary_stats(
         age, wt_kg, ht_cm, ct_blood, temp,
         type = "common"
     )
 
 
 # 17.3 janitor package ----------------------------------------------------
+# The janitor packages offers the tabyl() function to produce tabulations 
+# and cross-tabulations, which can be “adorned” or modified with helper 
+# functions to display percent, proportions, counts, etc.
+
+# ** Simple tabyl ====
+# Using tabyl() on a specific column produces the unique values, counts, 
+# and column-wise “percents” (actually proportions).
+linelist |> tabyl(age_cat)
+linelist |> tabyl(age_cat) |> adorn_rounding(digits = 3)
+
+
+# ** Cross-tabulation ====
+# Cross-tabulation counts are achieved by adding one or more additional 
+# columns within tabyl().
+linelist |> tabyl(age_cat, gender)
+
+
+# ** "Adorning" the tabyl ====
+# A simple one-way table with percent instead of the default proportions.
+linelist |> 
+    tabyl(age_cat) |> 
+    adorn_pct_formatting()
+
+# A cross-tabulation with a total row and row percent.
+linelist |> 
+    tabyl(age_cat, gender) |> 
+    adorn_totals(where = "row") |> 
+    adorn_percentages(denominator = "row") |> 
+    adorn_pct_formatting(digits = 1)
+
+# A cross-tabulation adjusted so that both counts and percent are displayed.
+linelist |> 
+    tabyl(age_cat, gender) |> 
+    adorn_totals(where = "row") |> 
+    adorn_percentages(denominator = "col") |> 
+    adorn_pct_formatting() |> 
+    adorn_ns(position = "front") |> 
+    adorn_title(
+        row_name = "Age category",
+        col_name = "Gender"
+    )
+
+
+# ** Printing the tabyl ====
+# By default, the tabyl will print the raw table to your R console.
+# Altly, you can pass the tabyl to flextable or similar package to print 
+# as a “pretty” image in the RStudio Viewer, which could be exported 
+# as .png, .jpeg, .html, etc.
+linelist |> 
+    tabyl(age_cat, gender) |> 
+    adorn_totals(where = "col") |> 
+    adorn_percentages(denominator = "col") |> 
+    adorn_pct_formatting() |> 
+    adorn_ns(position = "front") |> 
+    adorn_title(
+        row_name = "Age category",
+        col_name = "Gender",
+        placement = "combined"
+    ) |> 
+    flextable() |> 
+    autofit()
+
+
+# ** Use on other tables ====
+linelist |> 
+    count(hospital) |> 
+    adorn_totals()
+
+
+# ** Saving the tabyl ====
+
+
+
+
 
 
 
