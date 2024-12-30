@@ -1535,7 +1535,10 @@ library(easypackages)
 libraries(
     "rio",
     "here",
+    "flextable",
+    "janitor",
     "kableExtra",
+    "knitr",
     "tidyverse"
 )
 
@@ -1691,10 +1694,47 @@ ggplot(data = df_long, mapping = aes(x = date, y = id, fill = status)) +
 # CASE: When we want to transform the results of an analysis into a format 
 # which is more digestible for the reader like, a Table for presentation.
 
+# ** Data ====
+# In this section we will use the linelist dataset.
+# linelist <- import(here("data_prac", "linelist_cleaned.rds"))
+
+# Suppose that we want to know the counts of individuals in the 
+# different age groups, by gender
+df_wide <- linelist |> 
+    count(age_cat, gender)
+df_wide
+# This gives us a long dataset that is great for producing visualisations 
+# in ggplot2, but not ideal for presentation in a table.
+ggplot(data = df_wide) +
+    geom_col(aes(x = age_cat, y = n, fill = gender))
 
 
+# ** Pivot wider ====
+# Therefore, we can use pivot_wider() to transform the data into a 
+# better format for inclusion as tables in our reports.
+table_wide <- df_wide |> 
+    pivot_wider(
+        id_cols = age_cat,
+        names_from = gender,
+        values_from = n
+    )
+table_wide
+# This table is much more reader-friendly, and therefore better for 
+# inclusion in our reports. 
+
+# We can further convert it into a pretty table with several packages 
+# including flextable and knitr (see Tables for presentation) section.
+table_wide |> 
+    adorn_totals(c("row", "col")) |> 
+    kable() |> 
+    row_spec(row = 10, bold = TRUE) |> 
+    column_spec(column = 5, bold = TRUE)
 
 
+# 12.4 Fill ---------------------------------------------------------------
+
+
+    
 
 
 # TBC ####
