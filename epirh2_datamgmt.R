@@ -1770,8 +1770,44 @@ df_combined
 
 
 # ** fill() ====
+# Here, Year is a useful variable to include, particularly if we want to 
+# explore trends over time. Therefore, we use fill() to fill in those 
+# empty cells, by specifying the column to fill and the direction (here up)
+df_combined |> fill(Year, .direction = "up")
 
+# Altly, we can rearrange the data so that we would need to fill 
+# in a downward direction.
+df_combined <- df_combined |> arrange(Measurement, desc(Year))
+df_combined
+df_combined <- df_combined |> fill(Year, .direction = "down")
+df_combined
 
+# We now have a useful dataset in long format for plotting.
+ggplot(data = df_combined, aes(x = Year, y = Cases, fill = Facility)) +
+    geom_col()
+
+# However, this format is less useful for presenting in a table so 
+# let’s convert this long, untidy dataframe into a wider, tidy dataframe.
+df_combined |> 
+    pivot_wider(
+        id_cols = c(Measurement, Facility),
+        names_from = Year,
+        values_from = Cases
+    ) |> 
+    arrange(Facility) |> 
+    adorn_totals(where = c("row", "col")) |> 
+    kable() |> 
+    row_spec(row = 5, bold = T) |> 
+    column_spec(column = 5, bold = T)
+
+# NOTE: In this case, we had to specify to only include the three vars 
+# Facility, Year, and Cases as the additional var Measurement would 
+# interfere with the creation of the table
+df_combined |> pivot_wider(
+    names_from = Year,
+    values_from = Cases
+) |> 
+    kable()
 
 
 # TBC ####
