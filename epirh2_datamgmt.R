@@ -1732,9 +1732,46 @@ table_wide |>
 
 
 # 12.4 Fill ---------------------------------------------------------------
+# In some situations after a pivot, and more commonly after a bind, we are 
+# left with gaps in some cells that we would like to fill.
+
+# ** Data ====
+# CASE: We take two datasets, each with obsns for the measurement number, 
+# the name of the facility, and the case count at that time. 
+df1 <- tribble(
+    ~Measurement,   ~Facility,  ~Cases,
+    1,              "Hosp 1",   66,
+    2,              "Hosp 1",   26,
+    3,              "Hosp 1",   8,
+    1,              "Hosp 2",   71,
+    2,              "Hosp 2",   62,
+    3,              "Hosp 2",   70,
+    1,              "Hosp 3",   47,
+    2,              "Hosp 3",   70,
+    3,              "Hosp 3",   38
+)
+df1
+
+# However, the second dataset also has a variable Year.
+df2 <- tribble(
+    ~Year,  ~Measurement,   ~Facility,  ~Cases,
+    2000,   1,              "Hosp 4",   82,
+    2001,   2,              "Hosp 4",   87,
+    2002,   3,              "Hosp 4",   46
+)
+df2
+
+# When we perform a bind_rows() to join the two datasets together 
+# the Year variable is filled with NA for those rows where there was 
+# no prior information (i.e. the first dataset)
+df_combined <- bind_rows(df1, df2) |> 
+    arrange(Measurement, Facility)
+df_combined
 
 
-    
+# ** fill() ====
+
+
 
 
 # TBC ####
