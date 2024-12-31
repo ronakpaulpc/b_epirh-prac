@@ -1849,6 +1849,12 @@ ll_by_outcome <- linelist |>
 ll_by_outcome    
 
 
+# ** Unique groups ====
+linelist |> group_by(outcome) |> tally()
+
+linelist |> group_by(outcome, gender) |> tally() 
+
+
 # TBC ####
 
 
