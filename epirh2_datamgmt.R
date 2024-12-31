@@ -1810,6 +1810,45 @@ df_combined |> pivot_wider(
     kable()
 
 
+
+#_====
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# C13 - Grouping data -----------------------------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# This page covers how to group and aggregate data for descriptive analysis. 
+# It makes use of the tidyverse family of packages for common and 
+# easy-to-use functions.
+
+# Grouping data is a core component of data management and analysis. 
+# Grouped data statistically summarised by group, and can be plotted by group.
+# Functions from the dplyr package (part of the tidyverse) make grouping 
+# and subsequent operations quite easy.
+
+
+# 13.1 Preparation --------------------------------------------------------
+
+# ** Load packages ====
+# Here we load packages required for analysis.
+library(easypackages)
+libraries(
+    "rio",
+    "here",
+    "tidyverse",
+    "janitor"
+)
+
+
+# ** Import data ====
+linelist <- import(here("data_prac", "linelist_cleaned.rds"))
+linelist |> head() |> view()
+
+
+# 13.2 Grouping -----------------------------------------------------------
+ll_by_outcome <- linelist |> 
+    group_by(outcome)
+ll_by_outcome    
+
+
 # TBC ####
 
 
