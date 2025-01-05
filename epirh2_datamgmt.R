@@ -1846,13 +1846,49 @@ linelist |> head() |> view()
 # 13.2 Grouping -----------------------------------------------------------
 ll_by_outcome <- linelist |> 
     group_by(outcome)
+# NOTE: There is no perceptible change to the dataset after running group_by()
+# until another dplyr verb such as mutate(), summarise(), or arrange() is 
+# applied on the “grouped” data frame.
+# However, we can print to see which groups are active.
 ll_by_outcome    
 
 
 # ** Unique groups ====
+# There are three unique values in the grouping column outcome: 
+# “Death”, “Recover”, and NA.
 linelist |> group_by(outcome) |> tally()
 
+# We can group by more than one column, say outcome and gender.
 linelist |> group_by(outcome, gender) |> tally() 
+
+
+# ** New columns ====
+# We can also create a new grouping column within the group_by() statement. 
+# This is equivalent to calling mutate() before the group_by().
+linelist |> 
+    group_by(
+        age_class = if_else(age >= 18, "adult", "child")
+    ) |> 
+    tally(sort = T)
+
+
+# ** Add/drop grouping columns ====
+# By default, if you run group_by() on data that are already grouped, 
+# the old groups will be removed and the new one(s) will apply. 
+# If you want to add new groups to the existing ones, 
+# include the argument .add = TRUE.
+by_outcome <- linelist |> group_by(outcome)
+by_outcome |> count()
+
+# Adding grouping by gender
+by_outcome_gender <- by_outcome |> group_by(gender, .add = TRUE)
+by_outcome_gender |> count()
+
+
+# 13.3 Un-group -----------------------------------------------------------
+
+
+
 
 
 # TBC ####
