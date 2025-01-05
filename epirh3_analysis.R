@@ -176,8 +176,175 @@ chisq.test(age_by_outcome)
 
 
 # 17.4 dplyr package ------------------------------------------------------
+# Creating tables with dplyr functions summarise() and count() is a useful 
+# approach to calculating summary statistics and summary tables and 
+# pass them to ggplot().
+
+# summarise() creates a new, summary data frame. If the data are ungrouped 
+# it will return a one-row dataframe of the specified summary statistic.
+# If the data are grouped, the new data frame will have one row per group.
+
+# NOTE: This function works with both UK and US spellings, summarise() 
+# and summarize().
 
 
+# ** Get counts ====
+# The most simple function to apply within summarise() is n(). 
+# Leave the parentheses empty to count the number of rows.
+linelist |> 
+    summarize(n_rows = n())
+
+# If we have grouped the data beforehand, we get num of rows per group.
+linelist |> 
+    group_by(age_cat) |> 
+    summarize(n_rows = n())
+
+# Altly, we count use the count() fn which does the following:
+# - Groups the data by the columns provided to it,
+# - Summarizes them with n() (creating column n),
+# - Un-groups the data.
+linelist |> count(age_cat)
+
+# Counts of two or more grouping columns are returned in “long” format
+# with the counts in the n column. 
+linelist |> count(age_cat, outcome)
+
+
+# ** Show all levels ====
+# If you are tabling a column of class factor you can ensure that 
+# all levels are shown (not just the levels with values in the data) 
+# by adding .drop = FALSE into the summarise() or count() command.
+
+# NO CODE.
+
+
+# ** Proportions ====
+# Proportions can be added by piping the table to mutate() to create 
+# a new column. Define the new column as the counts column (n by default) 
+# divided by the sum() of the counts column (this will return a proportion).
+age_summary <- linelist |> 
+    count(age_cat) |> 
+    mutate(percent = n/sum(n))
+age_summary
+
+# To easily display percents, you can wrap the proportion in the 
+# function percent() from the scales package.
+# NOTE: This converts the percent col to class character.
+age_summary <- linelist |> 
+    count(age_cat) |> 
+    mutate(
+        percent = scales::percent(n/sum(n))
+    )
+age_summary
+
+# Now we learn to calculate proportions for groups within groups.
+age_by_outcome <- linelist |> 
+    group_by(outcome) |> 
+    count(age_cat) |> 
+    mutate(
+        percent = scales::percent(n / sum(n))
+    )
+print(age_by_outcome, n = 30)
+
+
+# ** Plotting ====
+# To display a “long” table output like the above with ggplot() is easy.
+df_age_outcome <- linelist |> count(age_cat, outcome)
+df_age_outcome
+# ggplot graph
+df_age_outcome |> ggplot() +
+    geom_col(aes(x = outcome, y = n, fill = age_cat))
+
+
+# ** Summary statistics ====
+
+
+# TBC ####
+
+
+
+# 17.5 gtsummary package --------------------------------------------------
+# You can use the gtsummary package and its function tbl_summary() to 
+# print your summary statistics in a pretty, publication-ready graphic.
+# You can also add the results of statistical tests to gtsummary tables.
+
+# ** Summary table ====
+# The default behaviour of tbl_summary() is quite incredible - it takes 
+# the columns you provide and creates a summary table in one command.
+linelist |> 
+    select(age_years, gender, outcome, fever, temp, hospital) |> 
+    tbl_summary()
+
+
+# ** Adjustments ====
+# Now we learn how the function works and how to make adjustments.
+# CASE: Simple example of using statistic arg to print col mean.
+linelist |> 
+    select(age_years) |> 
+    tbl_summary(
+        statistic = age_years ~ "{mean}"
+    )
+# Using the max and min values within parentheses and separated by a comma.
+linelist |> 
+    select(age_years) |> 
+    tbl_summary(
+        statistic = age_years ~ "({min}, {max})"
+    )
+
+# CASE: Each of the arguments are used to modify the original summary table.
+linelist |> 
+    
+    # keeping only cols of interest
+    select(age_years, gender, outcome, fever, temp, hospital) |> 
+    
+    tbl_summary(
+        by = outcome,
+        statistic = list(
+            all_continuous()    ~ "{mean} ({sd})",
+            all_categorical()   ~ "{n} / {N} ({p}%)"
+        ),
+        digits = all_continuous() ~ 1,
+        type = all_categorical() ~ "categorical",
+        
+        # including outcome for label gives ERROR
+        label = list(
+            age_years   ~ "Age (years)",
+            gender      ~ "Gender",
+            temp        ~ "Temperature",
+            hospital    ~ "Hospital"
+        ),
+        missing_text = "Missing"
+    )
+
+
+# ** Multi-line stats for continuous variables ====
+# You can print multiple lines of statistics for continuous variables 
+# by setting the type = to “continuous2”.
+linelist |> 
+    select(age_years, temp) |> 
+    tbl_summary(
+        type = all_continuous() ~ "continuous2",
+        statistic = all_continuous() ~ c(
+            "{mean} ({sd})",
+            "{median} ({p25}, {p75})",
+            "{min}, {max}"
+        )
+    )
+
+
+# 17.6 base R -------------------------------------------------------------
+# You can use the function table() to tabulate and cross-tabulate columns. 
+# Unlike the options above, you must specify the dataframe each time you 
+# reference a column name.
+table(linelist$outcome, useNA = "always")
+
+# Multiple columns can be cross-tabulated by listing them one after the other
+# separated by commas. 
+age_by_outcome <- table(linelist$age_cat, linelist$outcome, useNA = "always")
+age_by_outcome
+
+
+# ** Proportions ====
 
 
 # TBC ####

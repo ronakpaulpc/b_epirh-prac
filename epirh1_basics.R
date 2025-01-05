@@ -178,6 +178,8 @@ updateR()
 install.Rtools()
 
 # Updating the R packages
+# NOTE: Before Updating R packages Restart R (ctrl+shift+f10). Ensure no 
+# extra packages are loaded.
 update.packages(ask = F)
 
 # Functions
