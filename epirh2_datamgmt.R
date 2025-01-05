@@ -1886,8 +1886,24 @@ by_outcome_gender |> count()
 
 
 # 13.3 Un-group -----------------------------------------------------------
+# Data that have been grouped will remain grouped until specifically 
+# ungrouped via ungroup().
+df <- linelist |> 
+    group_by(outcome, gender) |> 
+    tally() 
+df
+df |> ungroup()
+
+# We can also remove grouping for only specific columns, by placing the 
+# column name inside ungroup().
+df <- linelist |> 
+    group_by(outcome, gender) |> 
+    tally()
+df
+df |> ungroup(gender)
 
 
+# 13.4 Summarise ----------------------------------------------------------
 
 
 
