@@ -345,6 +345,25 @@ age_by_outcome
 
 
 # ** Proportions ====
+# Get proportions of table defined above, by rows, rounded
+prop.table(age_by_outcome, margin = 1) |> round(2)
+
+
+# ** Totals ====
+# Pass the table to addmargins() to add row and column totals.
+addmargins(age_by_outcome)
+
+
+# ** Convert to dataframe ====
+# Converting a table() object directly to a dataframe is not straight-forward.
+# One approach is demonstrated below:
+table(fct_na_value_to_level(linelist$age_cat, level = "Missing"), 
+      fct_na_value_to_level(linelist$outcome, level = "Missing")
+      ) |> 
+    addmargins() |> 
+    as.data.frame.matrix() |> 
+    rownames_to_column(var = "Age category") |> 
+    flextable()
 
 
 # TBC ####
