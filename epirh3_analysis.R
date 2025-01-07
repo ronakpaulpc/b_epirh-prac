@@ -35,8 +35,8 @@ libraries(
 
 # ** Import data ====
 linelist <- import(here("data_prac", "linelist_cleaned.rds"))
-head(linelist) |> view(title = "linelist")
 glimpse(linelist)
+head(linelist) |> view(title = "linelist")
 
 
 # 17.2 Browse data --------------------------------------------------------
@@ -257,6 +257,38 @@ df_age_outcome |> ggplot() +
 
 
 # ** Summary statistics ====
+# One major advantage of dplyr and summarise() is the ability to return 
+# more advanced statistical summaries like median(), mean(), max(), min(), 
+# sd() (standard deviation), and percentiles.
+summary_table <- linelist |> 
+  group_by(hospital) |> 
+  summarize(
+    cases       = n(),
+    delay_max   = max(days_onset_hosp, na.rm = T),
+    delay_mean  = mean(days_onset_hosp, na.rm = T) |> round(1),
+    delay_sd    = sd(days_onset_hosp, na.rm = T) |> round(1),
+    delay_3     = sum(days_onset_hosp >= 3, na.rm = T),
+    pct_delay_3 = scales::percent(delay_3 / cases)
+  )
+summary_table
+
+
+# ** Conditional statistics ====
+# You may want to return conditional statistics - e.g. the maximum of rows 
+# that meet certain criteria. This can be done by subsetting the column 
+# with square brackets [ ].
+linelist |> 
+  group_by(hospital) |> 
+  summarize(
+    max_temp_fev = max(temp[fever == "yes"], na.rm = T),
+    min_temp_fev = min(temp[fever == "no"], na.rm = T)
+  )
+
+
+# ** Glueing together ====
+
+
+
 
 
 # TBC ####

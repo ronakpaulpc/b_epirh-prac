@@ -38,7 +38,7 @@ glimpse(linelist)
 # Before beginning to use flextable you will need to create your table 
 # as a dataframe. You must arrange the content in rows and columns as 
 # you want it displayed. Then, the dataframe will be passed to flextable 
-# to display it with colors, headers, fonts, etc.
+# to display it with colours, headers, fonts, etc.
 
 
 
