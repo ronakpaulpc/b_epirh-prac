@@ -286,7 +286,75 @@ linelist |>
 
 
 # ** Glueing together ====
+# The function str_glue() from stringr is useful to combine values from 
+# several columns into one new column. Here, this is typically used 
+# after the summarise() command.
+summary_table |> 
+  mutate(
+    delay = str_glue("{delay_mean} ({delay_sd})")
+  ) |> 
+  select(-c(delay_mean, delay_sd)) |> 
+  adorn_totals(where = "row") |> 
+  select(
+    "Hospital name"   = hospital,
+    "Cases"           = cases,
+    "Max delay"       = delay_max,
+    "Mean (sd)"       = delay,
+    "Delay 3+ days"   = delay_3,
+    "% delay 3+ days" = pct_delay_3
+  )
 
+
+# Percentiles
+# get default percentile values of age (0%, 25%, 50%, 75%, 100%)
+linelist |> 
+  summarize(
+    age_percentiles = quantile(age_years, na.rm = T)
+  )
+# ERROR: Returning more (or less) than 1 row per `summarise()` group was 
+# deprecated in dplyr 1.1.0.
+
+linelist |> reframe(
+  age_percentiles = quantile(
+    age_years, 
+    probs = c(0.05, 0.5, 0.75, 0.95), 
+    na.rm = T
+  )
+)
+
+# Get manually-specified percentile values of age (5%, 50%, 75%, 98%)
+linelist |> 
+  group_by(hospital) |> 
+  summarize(
+    p05 = quantile(age_years, probs = 0.05, na.rm = T),
+    p50 = quantile(age_years, probs = 0.50, na.rm = T),
+    p75 = quantile(age_years, probs = 0.75, na.rm = T),
+    p95 = quantile(age_years, probs = 0.95, na.rm = T)
+  )
+
+# Altly, we can produce summary statistics from the rstatix package.
+linelist |> 
+  group_by(hospital) |> 
+  get_summary_stats(age, type = "quantile")
+linelist |> get_summary_stats(age, type = "quantile")
+
+
+# ** Summarize aggregated data ====
+linelist_agg <- linelist |> 
+  drop_na(gender, outcome) |> 
+  count(outcome, gender)
+linelist_agg
+
+linelist_agg |> 
+  group_by(outcome) |> 
+  summarize(
+    total_cases   = sum(n, na.rm = T),
+    male_cases    = sum(n[gender == "m"], na.rm = T),
+    female_cases  = sum(n[gender == "f"], na.rm = T)
+  )
+
+
+# ** across() multiple columns ====
 
 
 
