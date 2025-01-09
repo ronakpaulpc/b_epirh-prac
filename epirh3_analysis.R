@@ -355,6 +355,42 @@ linelist_agg |>
 
 
 # ** across() multiple columns ====
+# You can use summarise() across multiple columns using across(). This makes 
+# life easier when you want to calculate the same statistics for many columns. 
+linelist |> 
+  group_by(outcome) |> 
+  summarize(
+    across(
+      .cols = c(age_years, temp, wt_kg, ht_cm),
+      ~ mean(.x, na.rm = T)
+    )
+  )
+
+# We can run multiple functions at once.
+linelist |> 
+  group_by(outcome) |> 
+  summarize(
+    across(
+      .cols = c(age_years, temp, wt_kg, ht_cm),
+      .fns = list(
+        ~ mean(.x, na.rm = T), 
+        ~ sd(.x, na.rm = T)
+      )
+    )
+  )
+
+# CASE: To return the mean of every numeric column use where() and 
+# provide the function as.numeric() (without parentheses).
+linelist |> 
+  group_by(outcome) |> 
+  summarize(across(
+    .cols   = where(is.numeric),
+    .fns    = ~ mean(.x, na.rm = T)
+  ))
+
+
+# ** Pivot wider ====
+
 
 
 
