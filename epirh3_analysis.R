@@ -617,17 +617,39 @@ linelist |> head(10) |> view()
 
 
 # 18.2 base R -------------------------------------------------------------
+# We can use base R functions to conduct statistical tests. The commands are 
+# relatively simple and results will print to the R Console for simple viewing.
+# However, the outputs are usually lists and so are harder to manipulate if 
+# you want to use the results in subsequent operations.
 
 
+# ** T-tests ====
+# A t-test, also called “Student’s t-Test”, is typically used to determine 
+# if there is a significant difference between the means of some numeric 
+# variable between two groups.
+# Syntax 1:
+t.test(age_years ~ gender, data = linelist)
+# Syntax 2:
+t.test(linelist$wt_kg, linelist$ht_cm)
+# This syntax can also be used to compare numeric vectors from two 
+# different datasets.
+
+# You can also use a t-test to determine whether a sample mean is 
+# significantly different from some specific value.
+t.test(linelist$age_years, mu = 45)
 
 
+# ** Shapiro-Wilk test ====
+# The Shapiro-Wilk test can be used to determine whether a sample came from 
+# a normally-distributed population.
+linelist |> ggplot(aes(x = age_years)) + geom_histogram()
+linelist_small <- linelist |> filter(age_years >= 18)
+shapiro.test(linelist_small$age_years)
+# This test can only be used on a sample between 3 and 5000 observations. 
+# For larger samples a quantile-quantile plot may be helpful.
 
 
-
-
-
-
-
+# ** Wilcoxon rank sum test ====
 
 
 # TBC ####
