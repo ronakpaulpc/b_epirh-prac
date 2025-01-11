@@ -49,6 +49,7 @@ p_load(
     janitor,
     gtsummary,
     rstatix,
+    corrr,
     broom,
     lmtest,
     easystats,

@@ -305,7 +305,7 @@ summary_table |>
   )
 
 
-# Percentiles
+# *** Percentiles
 # get default percentile values of age (0%, 25%, 50%, 75%, 100%)
 linelist |> 
   summarize(
@@ -390,13 +390,88 @@ linelist |>
 
 
 # ** Pivot wider ====
+# If you prefer your table in “wide” format you can transform it using the 
+# pivot_wider() fn. You will likely need to re-name the columns with rename().
+age_by_outcome <- linelist |> 
+  group_by(outcome) |> 
+  count(age_cat) |> 
+  mutate(
+    percent = scales::percent(n / sum(n))
+  )
+age_by_outcome
+# Pivoting to wide only the number column.
+age_by_outcome |> 
+  select(-percent) |> 
+  pivot_wider(names_from = age_cat, values_from = n)
+# Pivoting to wide only the number and percentage column.
+age_by_outcome |> 
+  pivot_wider(names_from = age_cat, values_from = c(n, percent))
 
 
+# ** Total rows ====
+# When summarise() operates on grouped data it does not automatically 
+# produce “total” statistics. Below, two approaches to adding a total row.
+
+# *** janitor's adorn_totals()
+linelist |> 
+  group_by(gender) |> 
+  summarize(
+    known_outcome   = sum(!is.na(outcome)),
+    n_death         = sum(outcome == "Death", na.rm = T),
+    n_recover       = sum(outcome == "Recover", na.rm = T)
+  ) |> 
+  adorn_totals() |> 
+  adorn_percentages("col") |> 
+  adorn_pct_formatting() |> 
+  adorn_ns(position = "front")
 
 
-
-# TBC ####
-
+# *** summarise() on "total" data and then bind_rows()
+by_hospital <- linelist |> 
+  filter(!is.na(outcome) & hospital != "Missing") |> 
+  group_by(hospital, outcome) |> 
+  summarize(
+    N         = n(),
+    ct_value  = median(ct_blood, na.rm = T)
+  )
+by_hospital
+# To get the totals, run the same summarize() command but only group the 
+# data by outcome (not by hospital).
+totals <- linelist |> 
+  filter(!is.na(outcome) & hospital != "Missing") |> 
+  group_by(outcome) |> 
+  summarize(
+    N         = n(),
+    ct_value  = median(ct_blood, na.rm = T)
+  )
+totals
+# We can bind these two data frames together. After binding the rows
+# we convert these empty spaces to “Total” using replace_na().
+table_long <- bind_rows(by_hospital, totals) |> 
+  mutate(hospital = replace_na(hospital, "Total"))
+table_long
+# Optionally, you can pivot this table wider to make it more readable. 
+# You can also add more columns, and arrange it nicely.
+table_long_ff <- table_long |> 
+  # pivot wider and format
+  mutate(hospital = replace_na(hospital, "Total")) |> 
+  pivot_wider(
+    names_from    = outcome,
+    values_from   = c(ct_value, N)
+  ) |> 
+  mutate(
+    N_Known       = N_Death + N_Recover,
+    Pct_Death     = scales::percent(N_Death / N_Known, 0.1),
+    Pct_Recover   = scales::percent(N_Recover / N_Known, 0.1)
+  ) |> 
+  select(
+    hospital, N_Known, N_Recover, Pct_Recover, ct_value_Recover, 
+    N_Death, Pct_Death, ct_value_Death
+  ) |> 
+  arrange(N_Known)
+table_long_ff
+# Convert to flextable
+table_long_ff |> flextable()
 
 
 # 17.5 gtsummary package --------------------------------------------------
@@ -502,8 +577,60 @@ table(fct_na_value_to_level(linelist$age_cat, level = "Missing"),
     flextable()
 
 
-# TBC ####
 
+#_====
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# C18 - Simple statistical tests ------------------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# This page demonstrates how to conduct simple statistical tests using 
+# base R, rstatix, and gtsummary.
+# Each of the above packages bring certain advantages and disadvantages:
+# 1.  Use base R functions to print a statistical outputs to the R Console.
+# 2.  Use rstatix functions to return results in a dataframe, or if you want 
+#     tests to run by group.
+# 3.  Use gtsummary if you want to quickly print publication-ready tables.
+
+
+# 18.1 Preparation --------------------------------------------------------
+
+# ** Load packages ====
+# Installing required packages
+# install.packages("corrr")
+# Loading required packages
+library(easypackages)
+libraries(
+  "rio",
+  "here",
+  "skimr",
+  "tidyverse",
+  "gtsummary",
+  "rstatix",
+  "corrr",
+  "janitor",
+  "flextable"
+)
+
+# ** Import ====
+linelist <- import(here("data_prac", "linelist_cleaned.rds"))
+glimpse(linelist)
+linelist |> head(10) |> view()
+
+
+# 18.2 base R -------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+# TBC ####
 
 
 

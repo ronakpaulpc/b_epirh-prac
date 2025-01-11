@@ -1820,9 +1820,9 @@ df_combined |> pivot_wider(
 # easy-to-use functions.
 
 # Grouping data is a core component of data management and analysis. 
-# Grouped data statistically summarised by group, and can be plotted by group.
-# Functions from the dplyr package (part of the tidyverse) make grouping 
-# and subsequent operations quite easy.
+# Grouped data is statistically summarised by group, and can be plotted 
+# by group. Functions from the dplyr package (part of the tidyverse) 
+# make grouping and subsequent operations quite easy.
 
 
 # 13.1 Preparation --------------------------------------------------------
