@@ -622,7 +622,6 @@ linelist |> head(10) |> view()
 # However, the outputs are usually lists and so are harder to manipulate if 
 # you want to use the results in subsequent operations.
 
-
 # ** T-tests ====
 # A t-test, also called “Student’s t-Test”, is typically used to determine 
 # if there is a significant difference between the means of some numeric 
@@ -643,6 +642,14 @@ t.test(linelist$age_years, mu = 45)
 # The Shapiro-Wilk test can be used to determine whether a sample came from 
 # a normally-distributed population.
 linelist |> ggplot(aes(x = age_years)) + geom_histogram()
+linelist |> filter(age_years >= 18) |> view(title = "18plus")
+linelist |> 
+  filter(age_years >= 18) |> 
+  ggplot(aes(x = age_years)) + 
+  geom_histogram(binwidth = 1) +
+  scale_x_continuous(
+    breaks = c(18, seq(20, 90, 5))
+  )
 linelist_small <- linelist |> filter(age_years >= 18)
 shapiro.test(linelist_small$age_years)
 # This test can only be used on a sample between 3 and 5000 observations. 
