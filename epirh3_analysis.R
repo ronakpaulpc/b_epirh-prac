@@ -657,6 +657,84 @@ shapiro.test(linelist_small$age_years)
 
 
 # ** Wilcoxon rank sum test ====
+# The Wilcoxon rank sum test, also called the Mann–Whitney U test, is 
+# often used to help determine if two numeric samples are from the same 
+# distribution when their populations are not normally distributed or 
+# have unequal variance.
+wilcox.test(age_years ~ outcome, data = linelist)
+
+
+# ** Kruskal-Wallis test ====
+# The Kruskal-Wallis test is an extension of the Wilcoxon rank sum test 
+# that can be used to test for differences in the distribution of more 
+# than two samples. When only two samples are used it gives identical 
+# results to the Wilcoxon rank sum test.
+kruskal.test(age_years ~ outcome, data = linelist)
+
+
+# ** Chi-squared test ====
+# Pearson’s Chi-squared test is used in testing for significant differences 
+# between categorical groups.
+chisq.test(linelist$gender, linelist$outcome)
+
+
+# 18.3 rstatix package ----------------------------------------------------
+# The rstatix package offers the ability to run statistical tests and 
+# retrieve results in a “pipe-friendly” framework. The results are
+# automatically in a dataframe so that you can perform subsequent 
+# operations on the results.
+
+# ** Summary statistics ====
+# The fn get_summary_stats() is a quick way to return summary statistics.
+# Simply pipe your dataset to this fn and provide the columns to analyse.
+linelist |> 
+  get_summary_stats(age, temp)
+
+# It can be used with grouped data as well, such that a row is returned 
+# for each grouping-variable:
+linelist |> 
+  group_by(hospital) |> 
+  get_summary_stats(age, temp, type = "common")
+
+
+# ** T-test ====
+linelist |> t_test(age_years ~ gender)
+# We can use ~ 1 and specify mu = for a one-sample T-test.
+linelist |> t_test(age_years ~ 1, mu = 30)
+# If applicable the statistical tests can be done by group.
+linelist |> 
+  group_by(gender) |> 
+  t_test(age_years ~ 1, mu = 18)
+
+
+# ** Shapiro-Wilk test ====
+linelist |> head(500) |> 
+  shapiro_test(age_years)
+
+
+# ** Wilcoxon rank sum test ====
+linelist |> 
+  wilcox_test(age_years ~ gender)
+
+
+# ** Kruskal-Wallis test ====
+# Also known as the Mann-Whitney U test.
+linelist |> 
+  kruskal_test(age_years ~ outcome)
+
+
+# Chi-squared test ====
+linelist |> 
+  tabyl(gender, outcome) |> 
+  select(-1) |> 
+  chisq_test()
+chisq_test(linelist$gender, linelist$outcome)  
+
+
+# 18.4 gtsummary package --------------------------------------------------
+
+
+
 
 
 # TBC ####

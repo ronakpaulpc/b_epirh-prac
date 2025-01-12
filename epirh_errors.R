@@ -1,11 +1,14 @@
 # Errors in the book are documented here.
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # C17 - Descriptive tables ------------------------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# 17.4 dplyr package ====
 
-# In subsection "Glueing together"
+# 17.4 dplyr package ------------------------------------------------------
+
+# ** Glueing together ====
 # ERROR:
 # Returning more (or less) than 1 row per `summarise()` group was deprecated 
 # in dplyr 1.1.0.
@@ -13,7 +16,8 @@
 # When switching from `summarise()` to `reframe()`, remember that `reframe()` 
 # always returns an ungrouped dataframe and adjust accordingly.
 
-# In subsection "across() multiple columns"
+# ** across() multiple columns ====
+# ERROR 1:
 linelist |> 
     group_by(outcome) |>  
     summarise(across(.cols = c(age_years, temp, wt_kg, ht_cm),
@@ -30,7 +34,7 @@ linelist |>
 # Now
 # across(a:b, \(x) mean(x, na.rm = TRUE))
 
-# In subsection "across() multiple columns"
+# ERROR 2:
 linelist |> 
     group_by(outcome) |> 
     summarize(
@@ -48,15 +52,25 @@ linelist |>
 # across(a:b, \(x) mean(x, na.rm = TRUE))
 
 
-# 17.6 base R ====
-
-# In subsection "Convert to dataframe"
+# 17.6 base R -------------------------------------------------------------
+# ** Convert to dataframe ====
 # ERROR: 
 # `fct_explicit_na()` was deprecated in forcats 1.0.0.
 # Please use `fct_na_value_to_level()` instead.
 
 
 
+#_====
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# C18 - Simple statistical tests ------------------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# 18.2 base R -------------------------------------------------------------
+
+# Chi-squared test ====
+# SPELLING MISTAKE
+# Pearson’s Chi-squared test is used in testing for significant differences 
+# between categorical <croups>.
 
 
 
