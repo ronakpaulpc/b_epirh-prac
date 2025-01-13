@@ -732,7 +732,66 @@ chisq_test(linelist$gender, linelist$outcome)
 
 
 # 18.4 gtsummary package --------------------------------------------------
+# Performing statistical tests of comparison with tbl_summary is done by 
+# adding the add_p function to a table and specifying which test to use. 
+# It is possible to get p-values corrected for multiple testing by using 
+# the add_q function.
 
+
+# ** Chi-squared test ====
+# The default statistical test for add_p() when applied to a categorical var 
+# is to perform a chi-squared test of independence with continuity correction.
+linelist |> 
+  select(gender, outcome) |> 
+  tbl_summary(by = outcome) |> 
+  add_p()
+
+
+# ** T-tests ====
+# Compare the difference in means for a continuous variable in two groups.
+linelist |> 
+  select(age_years, outcome) |> 
+  tbl_summary(
+    statistic = age_years ~ "{mean} ({sd})",
+    by = outcome
+  ) |> 
+  add_p(age_years ~ "t.test")
+
+
+# ** Wilcoxon rank sum test ====
+# Compare the distribution of a continuous variable in two groups.
+linelist |> 
+  select(age_years, outcome) |> 
+  tbl_summary(
+    statistic = age_years ~ "{median} ({p25}, {p75})",
+    by = outcome
+  ) |> 
+  add_p(age_years ~ "wilcox.test")
+
+
+# ** Kruskal-Wallis test ====
+# Compare the distribution of a continuous variable in two or more groups 
+# regardless of whether the data is normally distributed.
+
+# difference in age by outcome
+linelist |> 
+  select(age_years, outcome) |> 
+  tbl_summary(
+    by = outcome
+  ) |> 
+  add_p(age_years ~ "kruskal.test")
+
+# difference in age across hospitals
+linelist |> 
+  select(age_years, hospital) |> 
+  tbl_summary(
+    statistic = age_years ~ "{median} ({p25}, {p75})",
+    by = hospital
+  ) |> 
+  add_p(age_years ~ "kruskal.test")
+
+
+# 18.5 Correlations -------------------------------------------------------
 
 
 
