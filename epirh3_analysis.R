@@ -792,6 +792,97 @@ linelist |>
 
 
 # 18.5 Correlations -------------------------------------------------------
+# The tidyverse corrr package allows you to compute correlations using 
+# Pearson, Kendall tau or Spearman rho. The package creates a table and 
+# also has a function to automatically plot the values.
+correlation_tab <- linelist |> 
+  # keeping only numeric vars
+  select(generation, age, ct_blood, days_onset_hosp, wt_kg, ht_cm) |> 
+  correlate()
+correlation_tab
+# remove duplicate entries
+correlation_tab <- correlation_tab |> shave()
+correlation_tab
+# plot the correlations
+rplot(correlation_tab, colors = c("red","grey", "green"))
+
+
+
+#_====
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# C19 - Univariate and multivariable regression ---------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Here we learn the use of base R regression functions such as glm() and 
+# the gtsummary package to look at associations between variables 
+# (e.g. odds ratios, risk ratios and hazard ratios). It also uses functions 
+# like tidy() from the broom package to clean-up regression outputs.
+
+# NOTE: We use the term multivariable to refer to a regression with 
+# multiple explanatory variables. In this sense a multivariate model would 
+# be a regression with several outcomes.
+
+
+# 19.1 Preparation --------------------------------------------------------
+
+# ** Load packages ====
+library(easypackages)
+libraries(
+  "rio",
+  "here",
+  "tidyverse",
+  "stringr",
+  "purrr",
+  "janitor",
+  "gtsummary",
+  "broom",
+  "lmtest",
+  "parameters",
+  "see"
+)
+
+# ** Import data ====
+linelist <- import(here("data_prac", "linelist_cleaned.rds"))
+
+
+# ** Clean data ====
+# *** Store explanatory variables
+# We store the names of the explanatory columns as a character vector. 
+# This will be referenced later.
+explanatory_vars <- c("gender", "fever", "chills", "cough", "aches", "vomit")
+explanatory_vars
+
+# *** Convert to 1's and 0's
+# Below we convert the explanatory columns from “yes”/“no”, “m”/“f”, 
+# and “dead”/“alive” to 1 / 0, to cooperate with the expectations of 
+# logistic regression models.
+# convert all dichotomous variables to 0/1
+linelist <- linelist |> 
+  mutate(
+    across(
+      .cols = all_of(c(explanatory_vars, "outcome")),
+      .fns  = ~ case_when(
+        .x %in% c("m", "yes", "Death")  ~ 1,
+        .x %in% c("f", "no", "Recover") ~ 0,
+        .default = NA_real_
+      )
+    )
+  )
+
+# *** Drop rows with missing values
+# To drop rows with missing values, can use the tidyr function drop_na(). 
+# However, we only want to do this for rows that are missing values in 
+# the columns of interest.
+# add in age_category to the explanatory vars
+explanatory_vars <- c(explanatory_vars, "age_cat")
+explanatory_vars
+# drop rows with missing information for variables of interest
+linelist <- linelist |>
+  select(all_of(explanatory_vars), outcome) |> 
+  drop_na()
+
+
+# 19.2 Univariate ---------------------------------------------------------
+
 
 
 
