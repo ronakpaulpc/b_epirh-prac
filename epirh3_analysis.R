@@ -840,6 +840,7 @@ libraries(
   "see"
 )
 
+
 # ** Import data ====
 linelist <- import(here("data_prac", "linelist_cleaned.rds"))
 
@@ -882,7 +883,78 @@ linelist <- linelist |>
 
 
 # 19.2 Univariate ---------------------------------------------------------
+# Just like in the page on Descriptive tables, your use case will determine 
+# which R package you use. 
+# We present two options for doing univariate analysis - base R, gtsummary.
 
+
+# ** base R - Linear regression ====
+# The function lm() performs linear regression, assessing the relationship 
+# between numeric response and explanatory variables that are assumed to 
+# have a linear relationship.
+
+# First we provide the equation as a formula. Define the model results 
+# as an R object, to use later.
+lm_results <- lm(data = linelist, ht_cm ~ age, )
+# Then we run summary() on the model results to see the coefficients 
+# (Estimates), P-value, residuals, and other measures.
+summary(lm_results)
+
+# Altly, you can use the tidy() function from the broom package to 
+# pull the results in to a table. 
+tidy(lm_results)
+
+# You can then also use this regression to add it to a ggplot. To do this 
+# we first pull the points for the observed data and the fitted line into 
+# one dataframe using the augment() function from broom.
+points <- augment(lm_results)
+points
+# Now, we plot the data using age as the x-axis.
+ggplot(data = points, aes(x = age)) +
+  geom_point(aes(y = ht_cm)) +
+  geom_line(
+    aes(y = .fitted),
+    linewidth = 1.5,
+    colour = "red"
+  )
+
+# Altly, you can add a simple linear regression straight in ggplot 
+# using the geom_smooth() function.
+ggplot(data = linelist, aes(x = age, y = ht_cm)) +
+  geom_point() +
+  geom_smooth(
+    method = "lm",
+    se = F,
+    linewidth = 1.5, colour = "red"
+  )
+
+
+# ** base R - Logistic regression ====
+# The function glm() from the stats package (part of base R) is used to 
+# fit Generalized Linear Models (GLM).
+# NO CODE.
+
+
+# ** base R - Univariate glm() ====
+# CASE: We are assessing the association between different age categories 
+# and the outcome of death (coded as 1 in the Preparation section).
+model <- glm(data = linelist, outcome ~ age_cat, family = "binomial")
+summary(model)
+# NOTE: The estimates provided are the log-odds and that the baseline level 
+# is the first factor level of age_cat (“0-4”).
+
+# To alter the baseline level of a given var, ensure the col is class Factor 
+# and move the desired level to the first position with fct_relevel().
+model_2 <- linelist |> 
+  mutate(
+    age_cat = fct_relevel(age_cat, "20-29", after = 0)
+  ) |> 
+  glm(formula = outcome ~ age_cat, family = "binomial")
+summary(model_2)
+tidy(model_2)
+
+
+# ** base R - Printing results ====
 
 
 

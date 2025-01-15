@@ -74,8 +74,20 @@ linelist |>
 
 
 
+#_====
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# C19 - Univariate and multivariable regression ---------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+# 19.2 Univariate ---------------------------------------------------------
 
+# ** base R - Linear regression ====
+# GRAMMATICAL MISTAKE
+# The base R function lm() <perform> linear regression
+
+# REPEATED WORD
+# It is also possible to add a simple linear regression straight <straight> 
+# in ggplot using the geom_smooth() function.
 
 
 
