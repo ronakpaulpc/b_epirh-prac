@@ -104,3 +104,13 @@ linelist |>
 # explanatory_vars |> str_c("outcome ~ ", .)
 # Error: object '.' not found
 
+
+# 19.4 Multivariable ------------------------------------------------------
+
+# ** Conduct multivariable ====
+# WORD OMITTED
+# Specify which variable selection direction you want <to> use when 
+# building the model.
+
+
+

@@ -993,27 +993,142 @@ combined |> qflextable()
 
 # ** Looping multiple univariate models ====
 # Below we present a method using glm() and tidy().
-explanatory_vars |> str_c("outome ~ ", explanatory_vars)
 explanatory_vars
+str_c("outcome ~ ", explanatory_vars)
 
-models <- explanatory_vars |> 
-  str_c("outcome ~ ", explanatory_vars) |> 
-    map(
-      \(x) glm(data = linelist, formula = as.formula(x), family  = "binomial")
-    ) 
-  
+models <- str_c("outcome ~ ", explanatory_vars) |> 
+  # univariate regression model for each formula
   map(
-    .f = ~ tidy(
-      .x, 
-      exponentiate = T,
-      conf.int = T
-    )
-  )
+    \(x) glm(data = linelist, formula = as.formula(x), family  = "binomial")
+  ) |> 
   
+  # tidy up the glm regression output
+  map(
+    \(x) tidy(x, exponentiate = T, conf.int = T)
+  ) |> 
   
+  # collapse list of regression outputs into one dataframe
+  bind_rows() |> 
+  
+  mutate(across(
+    .cols = where(is.numeric),
+    .fns  = ~ round(.x, digits = 2)
+  ))
 models
 
+# As before, we can create a counts table from the linelist for each 
+# explanatory variable, bind it to models, and make a nice table.
+univ_tab_base <- explanatory_vars |> 
+  map(
+    function(x) {
+      linelist |> 
+        group_by(outcome) |>
+        count({{x}})
+    }
+  )
+univ_tab_base
 
+
+# TBC ####
+
+
+# ** gtsummary package ====
+# Below we present the use of tbl_uvregression() from the gtsummary package.
+# We select only the necessary columns from the linelist and pipe them 
+# into tbl_uvregression().
+univ_tab <- linelist |> 
+  select(all_of(explanatory_vars), outcome) |> 
+  tbl_uvregression(
+    method = glm,
+    y = outcome,
+    method.args = list(family = binomial),
+    exponentiate = T
+  )
+univ_tab
+
+
+# 19.3 Stratified ---------------------------------------------------------
+# Stratified analysis is currently still being worked on for gtsummary. 
+# This page will be updated in due course.
+# NO CODE.
+
+
+# 19.4 Multivariable ------------------------------------------------------
+# For multivariable analysis, we again present two approaches:
+# 1. glm() and tidy().
+# 2. gtsummary package.
+# The workflow is similar for each and only the last step of pulling 
+# together a final table is different.
+
+# ** Conduct multivariable ====
+# Here we use glm() but add more variables to the right side of the equation
+# separated by plus symbols (+).
+mv_reg <- glm(
+  data = linelist,
+  outcome ~ gender + fever + chills + cough + aches + vomit + age_cat,
+  family = "binomial"
+)
+summary(mv_reg)
+
+# If you want to include two variables and an interaction between them 
+# you can separate them with an asterisk * instead of a +.
+model_ex <- glm(
+  data = linelist, 
+  outcome ~ gender + age_cat * fever, 
+  family = "binomial"
+)
+summary(model_ex)
+
+## run a regression with all variables of interest 
+mv_reg <- explanatory_vars %>%  ## begin with vector of explanatory column names
+  str_c(collapse = "+") %>%     ## combine var names separated by a plus
+  str_c("outcome ~ ", .) %>%    ## combine var names with outcome in formula style
+  glm(family = "binomial",      ## define type of glm as logistic,
+      data = linelist)          ## define your dataset
+summary(mv_reg)
+# NOTE: Using |> in place of %>% gives error.
+# Error in eval(mf, parent.frame()) : object '.' not found.
+
+# *** Building the model
+# You can build your model step-by-step, saving various models that include 
+# certain explanatory variables. You can compare these models with 
+# likelihood-ratio tests using lrtest() from the package lmtest.
+model1 <- glm(data = linelist, outcome ~ age_cat, family = "binomial")
+model2 <- glm(data = linelist, outcome ~ age_cat + gender, family = "binomial")
+# You can also turn off scientific notation in your R session, for clarity
+options(scipen = 999)
+lrtest(model1, model2)
+
+# Another option is to take the model object and apply the step() function 
+# from the stats package. Specify which variable selection direction you 
+# want to use when building the model.
+final_mv_reg <- mv_reg |> 
+  step(direction = "forward", trace = F)
+final_mv_reg |> summary()
+# Now we pass the model output to tidy() to exponentiate the log odds and CIs.
+mv_tab_base <- final_mv_reg |> 
+  tidy(exponentiate = T, conf.int = T) |> 
+  mutate(across(
+    .cols = where(is.numeric),
+    .fns  = \(x) round(x, digits = 2)
+  ))
+mv_tab_base
+
+
+# ** Combine with gtsummary ====
+# The gtsummary package provides the tbl_regression() function which will 
+# take the outputs from a regression and produce an nice summary table.
+mv_tab <- tbl_regression(final_mv_reg, exponentiate = T)
+mv_tab
+# Now we combine the multivariable results with the gtsummary univariate 
+# results using tbl_merge() function.
+tbl_merge(
+  list(univ_tab, mv_tab),
+  tab_spanner = c("**Univariate**", "**Multivariable**")
+)
+
+
+# ** Combine with dplyr ====
 
 
 # TBC ####
