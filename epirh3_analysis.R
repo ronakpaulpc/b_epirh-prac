@@ -835,6 +835,7 @@ libraries(
   "janitor",
   "gtsummary",
   "broom",
+  "flextable",
   "lmtest",
   "parameters",
   "see"
@@ -955,6 +956,62 @@ tidy(model_2)
 
 
 # ** base R - Printing results ====
+# The function tidy() from the package broom is convenient for making the 
+# model results presentable.
+
+# Here we demonstrate how to combine model outputs with a table of counts.
+# 1. Get the exponentiated log odds ratio estimates and confidence intervals.
+model <- glm(data = linelist, outcome ~ age_cat, family = "binomial") |> 
+  tidy(exponentiate = T, conf.int = T) |> 
+  mutate(
+    across(
+      .cols   = where(is.numeric),
+      .fns    = ~ round(.x, digits = 2)
+    )
+  )
+model
+# 2. Combine these model results with a table of counts.
+counts_table <- linelist |> tabyl(age_cat, outcome)
+counts_table
+# 3. Now we can bind the counts_table and the model results together 
+# horizontally with bind_cols() (dplyr).
+combined <- bind_cols(counts_table, model) |> 
+  select(term, 2:3, estimate, conf.low, conf.high, p.value) |> 
+  mutate(
+    across(
+      .cols = where(is.numeric),
+      .fns  = ~ round(.x, digits = 2)
+    )
+  )
+combined
+# NOTE: With bind_cols() the rows in the two data frames must be aligned 
+# perfectly.
+
+# Now we print the dataframe nicely as an image using flextable.
+combined |> qflextable()
+
+
+# ** Looping multiple univariate models ====
+# Below we present a method using glm() and tidy().
+explanatory_vars |> str_c("outome ~ ", explanatory_vars)
+explanatory_vars
+
+models <- explanatory_vars |> 
+  str_c("outcome ~ ", explanatory_vars) |> 
+    map(
+      \(x) glm(data = linelist, formula = as.formula(x), family  = "binomial")
+    ) 
+  
+  map(
+    .f = ~ tidy(
+      .x, 
+      exponentiate = T,
+      conf.int = T
+    )
+  )
+  
+  
+models
 
 
 

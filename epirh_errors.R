@@ -90,6 +90,17 @@ linelist |>
 # in ggplot using the geom_smooth() function.
 
 
+# ** base R - Printing results ====
+# Warning message:
+#   There was 1 warning in `mutate()`.
+#   In argument: `across(.cols = where(is.numeric), .fns = round, digits = 2)`.
+# Caused by warning:
+#   The `...` argument of `across()` is deprecated as of dplyr 1.1.0.
+# Supply arguments directly to `.fns` through an anonymous function instead.
 
 
+# ** base R - Looping multiple univariate models ====
+# ERROR
+# explanatory_vars |> str_c("outcome ~ ", .)
+# Error: object '.' not found
 
