@@ -995,7 +995,6 @@ combined |> qflextable()
 # Below we present a method using glm() and tidy().
 explanatory_vars
 str_c("outcome ~ ", explanatory_vars)
-
 models <- str_c("outcome ~ ", explanatory_vars) |> 
   # univariate regression model for each formula
   map(
@@ -1129,6 +1128,14 @@ tbl_merge(
 
 
 # ** Combine with dplyr ====
+# An alternative way of combining the univariate and multivariable outputs 
+# is with the dplyr join functions.
+
+
+
+
+
+
 
 
 # TBC ####
