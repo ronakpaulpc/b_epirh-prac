@@ -995,7 +995,7 @@ combined |> qflextable()
 # Below we present a method using glm() and tidy().
 explanatory_vars
 str_c("outcome ~ ", explanatory_vars)
-
+# This approach uses map() from the package purrr to iterate.
 models <- str_c("outcome ~ ", explanatory_vars) |> 
   # univariate regression model for each formula
   map(
@@ -1023,7 +1023,36 @@ univ_tab_base <- explanatory_vars |>
     function(x) {
       linelist |> 
         group_by(outcome) |>
-        count({{x}})
+        count({{x}}) |> 
+        pivot_wider(
+          names_from = outcome,
+          values_from = n
+        ) |> 
+        drop_na() |> 
+        # rename variable by its position
+        rename("variable" = 1)
+    }
+  ) |>
+  
+  # collapse list of output into one dataframe
+  bind_rows() |> mutate(variable = as.character(variable))
+  
+  # merge with regression output
+  bind_cols(models)
+
+# ERROR: bind_cols() gives error.
+# SOL: Use join function. 
+univ_tab_base
+
+# TRIAL
+univ_tab_base <- explanatory_vars |> 
+  
+  map(
+    function(x) {
+      linelist |> 
+        group_by(outcome) |> 
+        count({{x}}) |> 
+        rename()
     }
   )
 univ_tab_base
@@ -1129,6 +1158,14 @@ tbl_merge(
 
 
 # ** Combine with dplyr ====
+# An alternative way of combining the univariate and multivariable outputs 
+# is with the dplyr join functions.
+
+
+
+
+
+
 
 
 # TBC ####
