@@ -103,6 +103,13 @@ linelist |>
 # ERROR
 # explanatory_vars |> str_c("outcome ~ ", .)
 # Error: object '.' not found
+# NOTE: This error arises because of using the base pipe instead of the
+# margrittr pipe.
+
+# ERROR: Wrong description
+# The count table in univ_tab_base are actually crosstabs.  
+# Check the following code and compare: 
+# linelist |> tabyl(gender, outcome)
 
 
 # 19.4 Multivariable ------------------------------------------------------

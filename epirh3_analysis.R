@@ -893,10 +893,12 @@ linelist <- linelist |>
 # The function lm() performs linear regression, assessing the relationship 
 # between numeric response and explanatory variables that are assumed to 
 # have a linear relationship.
+# NOTE: The Linear regression section uses the unmodified linelist dataset.
+# linelist <- import(here("data_prac", "linelist_cleaned.rds"))
 
 # First we provide the equation as a formula. Define the model results 
 # as an R object, to use later.
-lm_results <- lm(data = linelist, ht_cm ~ age, )
+lm_results <- lm(data = linelist, ht_cm ~ age)
 # Then we run summary() on the model results to see the coefficients 
 # (Estimates), P-value, residuals, and other measures.
 summary(lm_results)
@@ -939,6 +941,8 @@ ggplot(data = linelist, aes(x = age, y = ht_cm)) +
 # ** base R - Univariate glm() ====
 # CASE: We are assessing the association between different age categories 
 # and the outcome of death (coded as 1 in the Preparation section).
+
+# NOTE: Modify the linelist data in Preparation section before using.
 model <- glm(data = linelist, outcome ~ age_cat, family = "binomial")
 summary(model)
 # NOTE: The estimates provided are the log-odds and that the baseline level 
@@ -1010,6 +1014,7 @@ models <- str_c("outcome ~ ", explanatory_vars) |>
   # collapse list of regression outputs into one dataframe
   bind_rows() |> 
   
+  # format the regression output
   mutate(across(
     .cols = where(is.numeric),
     .fns  = ~ round(.x, digits = 2)
@@ -1050,13 +1055,11 @@ univ_tab_base <- explanatory_vars |>
   map(
     function(x) {
       linelist |> 
-        group_by(outcome) |> 
-        count({{x}}) |> 
-        rename()
+        tabyl(x, outcome)
     }
   )
 univ_tab_base
-
+# ERROR NOT RESOLVED
 
 # TBC ####
 
@@ -1160,6 +1163,12 @@ tbl_merge(
 # ** Combine with dplyr ====
 # An alternative way of combining the univariate and multivariable outputs 
 # is with the dplyr join functions.
+# CANNOT DO. univ_tab_base preparation code has errors.
+
+
+# 19.5 Forest plot --------------------------------------------------------
+
+
 
 
 
