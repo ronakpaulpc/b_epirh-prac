@@ -999,7 +999,10 @@ combined |> qflextable()
 # Below we present a method using glm() and tidy().
 explanatory_vars
 str_c("outcome ~ ", explanatory_vars)
+<<<<<<< HEAD
 # This approach uses map() from the package purrr to iterate.
+=======
+>>>>>>> ddedeaae2dd34e494167362275334699ab7220cb
 models <- str_c("outcome ~ ", explanatory_vars) |> 
   # univariate regression model for each formula
   map(
@@ -1163,6 +1166,7 @@ tbl_merge(
 # ** Combine with dplyr ====
 # An alternative way of combining the univariate and multivariable outputs 
 # is with the dplyr join functions.
+<<<<<<< HEAD
 # CANNOT DO. univ_tab_base preparation code has errors.
 
 
@@ -1197,6 +1201,8 @@ mv_tab_base |>
   geom_point() +
   
   geom_errorbar(aes(xmin = conf.low, xmax = conf.high))
+=======
+>>>>>>> ddedeaae2dd34e494167362275334699ab7220cb
 
 
 
