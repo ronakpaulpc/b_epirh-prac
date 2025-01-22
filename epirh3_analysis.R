@@ -1167,7 +1167,17 @@ tbl_merge(
 
 
 # 19.5 Forest plot --------------------------------------------------------
+# Here we learn to plot the outputs of regression models. There are 2 options 
+# - using ggplot2, or 
+# - using a meta-package called easystats.
 
+# ** ggplot2 package ====
+# You can build a forest plot with ggplot() by plotting elements of the 
+# multivariable regression results. Add the layers of the plots using 
+# these “geoms”:
+# - estimates with geom_point()
+# - confidence intervals with geom_errorbar()
+# - a vertical line at OR = 1 with geom_vline()
 
 
 
