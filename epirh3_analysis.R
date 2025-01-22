@@ -1178,7 +1178,25 @@ tbl_merge(
 # - estimates with geom_point()
 # - confidence intervals with geom_errorbar()
 # - a vertical line at OR = 1 with geom_vline()
-
+mv_tab_base |> 
+  
+  # set order of levels in var name term
+  mutate(term = fct_relevel(
+    term,
+    "gender", "vomit", "fever", "cough", "chills", "aches", "age_cat5-9",
+    "age_cat10-14", "age_cat15-19", "age_cat20-29", "age_cat30-49",
+    "age_cat50-69", "age_cat70+"
+  )) |> 
+  
+  # remove Intercept value from plot
+  filter(term != "(Intercept)") |> 
+  
+  # plot starts from here with varnames on y and estimates on x
+  ggplot(aes(x = estimate, y = term)) +
+  # point estimates
+  geom_point() +
+  
+  geom_errorbar(aes(xmin = conf.low, xmax = conf.high))
 
 
 
