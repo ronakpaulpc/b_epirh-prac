@@ -100,13 +100,13 @@ linelist |>
 
 
 # ** base R - Looping multiple univariate models ====
-# ERROR
+# ERROR: Wrong pipe operator.
 # explanatory_vars |> str_c("outcome ~ ", .)
 # Error: object '.' not found
 # NOTE: This error arises because of using the base pipe instead of the
 # margrittr pipe.
 
-# ERROR: Wrong description
+# ERROR: Wrong description.
 # The count table in univ_tab_base are actually crosstabs.  
 # Check the following code and compare: 
 # linelist |> tabyl(gender, outcome)
@@ -115,9 +115,20 @@ linelist |>
 # 19.4 Multivariable ------------------------------------------------------
 
 # ** Conduct multivariable ====
-# WORD OMITTED
+# ERROR: Word omitted.
 # Specify which variable selection direction you want <to> use when 
 # building the model.
+
+
+# 19.5 Forest plot --------------------------------------------------------
+
+# ** easystats packages ====
+# ERROR: Extra word.
+# An alternative, if you do not want <to> the fine level of control that 
+# ggplot2 provides, is to use a combination of easystats packages.
+
+
+
 
 
 

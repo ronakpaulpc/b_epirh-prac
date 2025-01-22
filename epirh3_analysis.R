@@ -999,10 +999,7 @@ combined |> qflextable()
 # Below we present a method using glm() and tidy().
 explanatory_vars
 str_c("outcome ~ ", explanatory_vars)
-<<<<<<< HEAD
 # This approach uses map() from the package purrr to iterate.
-=======
->>>>>>> ddedeaae2dd34e494167362275334699ab7220cb
 models <- str_c("outcome ~ ", explanatory_vars) |> 
   # univariate regression model for each formula
   map(
@@ -1063,8 +1060,7 @@ univ_tab_base <- explanatory_vars |>
   )
 univ_tab_base
 # ERROR NOT RESOLVED
-
-# TBC ####
+# ERROR ####
 
 
 # ** gtsummary package ====
@@ -1166,7 +1162,6 @@ tbl_merge(
 # ** Combine with dplyr ====
 # An alternative way of combining the univariate and multivariable outputs 
 # is with the dplyr join functions.
-<<<<<<< HEAD
 # CANNOT DO. univ_tab_base preparation code has errors.
 
 
@@ -1197,17 +1192,77 @@ mv_tab_base |>
   
   # plot starts from here with varnames on y and estimates on x
   ggplot(aes(x = estimate, y = term)) +
-  # point estimates
-  geom_point() +
   
-  geom_errorbar(aes(xmin = conf.low, xmax = conf.high))
-=======
->>>>>>> ddedeaae2dd34e494167362275334699ab7220cb
+  # point estimates
+  geom_point(size = 3) +
+  
+  # adding error bars for the confidence interval
+  geom_errorbar(
+    aes(xmin = conf.low, xmax = conf.high),
+    size = 1, width = 0.2 
+  ) +
+  
+  # show where OR = 1 as a dashed line for reference
+  geom_vline(
+    aes(xintercept = 1),
+    linetype = "dashed"
+  )
+
+# CASE: Experiment with other geoms for showing CI's
+# Base model
+mv_model_b <- glm(
+  data = linelist,
+  outcome ~ gender + fever + chills + cough + aches + vomit,
+  family = "binomial"
+)
+summary(mv_model_b)
+tidy(mv_model_b)
+# Convert model output to dataframe and prep for plotting
+mv_model_d <- mv_model_b |> 
+  tidy(exponentiate = T, conf.int = T) |> 
+  filter(term != "(Intercept)") |> 
+  mutate(term = fct_relevel(
+    term,
+    "gender", "fever", "chills", "cough", "aches", "vomit"
+  ))
+mv_model_d
+
+# Converting regression output to "linerange" plot
+mv_model_d |> 
+  ggplot(aes(x = estimate, y = fct_rev(term))) +
+  geom_vline(aes(xintercept = 1), linewidth = 0.8, linetype = "dashed") +
+  geom_linerange(
+    aes(xmin = conf.low, xmax = conf.high),
+    size = 1.5, colour = "red"
+  ) +
+  geom_point(size = 5, colour = "royalblue")
+  
+# Converting regression output to "pointrange" plot
+mv_model_d |> 
+  ggplot(aes(x = estimate, y = fct_rev(term))) +
+  geom_vline(aes(xintercept = 1), linewidth = 0.8, linetype = "dashed") +
+  geom_pointrange(
+    aes(xmin = conf.low, xmax = conf.high),
+    size = 1.5, linewidth = 1, colour = "red"
+  )
 
 
+# ** easystats package ====
+# The fn model_parameters() from the parameters package does the equivalent 
+# of the broom package function tidy(). The see package then accepts those 
+# outputs and creates a default forest plot as a ggplot() object.
 
-
-
+# Preparing the base model
+mv_reg <- linelist |> glm(
+  formula = outcome ~ gender + fever + chills + cough + aches + vomit + age_cat,
+  family = "binomial"
+)
+summary(mv_reg)
+tidy(mv_reg, exponentiate = T, conf.int = T)
+# Convert model output to easystats plot
+final_mv_reg |> 
+  model_parameters(exponentiate = T) |> 
+  plot()
 
 
 
