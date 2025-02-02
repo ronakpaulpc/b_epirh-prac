@@ -1906,8 +1906,91 @@ df |> ungroup(gender)
 # 13.4 Summarise ----------------------------------------------------------
 
 
+# TBC ####
+
+
+
+#_====
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# C14 - Joining data ------------------------------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Here we learn to “join”, “match”, “link” “bind”, and otherwise 
+# combine dataframes. This page we demonstrate code to:
+#   1. Conduct joins of two data frames such that rows are matched based on 
+#      common values in identifier columns.
+#   2. Join two dataframes based on probabilistic (likely) matches between 
+#      values.
+#   3. Expand a dataframe by directly binding or (“appending”) rows or columns
+#      from another dataframe.
+
+
+# 14.1 Preparation --------------------------------------------------------
+ 
+# ** Load packages ====
+# Installing packages
+# install.packages(c("RecordLinkage", "fastLink"))
+
+# Loading the required packages
+library(easypackages)
+libraries(
+    "rio",
+    "here",
+    "tidyverse",
+    "RecordLinkage",
+    "fastLink"
+)
+
+
+# ** Import data ====
+linelist <- import(here("data_prac", "linelist_cleaned.rds"))
+
+
+# ** Example datasets ====
+# In the joining section below, we will use the following datasets:
+# - A “miniature” version of the case linelist, containing only the columns 
+#   case_id, date_onset, and hospital, and only the first 10 rows.
+# - A separate data frame named hosp_info, which contains more details about 
+#   each hospital.
+# - In the section on probabilistic matching, we will use two different small 
+#   datasets. The code to create those datasets is given in that section.
+
+# *** "Miniature" case linelist
+linelist_mini <- linelist |>
+    select(case_id, date_onset, hospital) |> 
+    head(10)
+linelist_mini
+
+# *** Hospital information dataframe
+hosp_info <- data.frame(
+    hosp_name = c("central hospital", "military", "military", "port", "St. Mark's", "ignace", "sisters"),
+    catchment_pop = c(1950280, 40500, 10000, 50280, 12000, 5000, 4200),
+    level = c("Tertiary", "Secondary", "Primary", "Secondary", "Secondary", "Primary", "Primary")
+)
+hosp_info
+
+
+# ** Pre-cleaning ====
+
 
 # TBC ####
+
+
+
+
+
+
+#_====
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# C16 - Iteration, loops and lists ----------------------------------------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# TBC ####
+
+
+
+
+
+
+
 
 
 
