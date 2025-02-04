@@ -1970,6 +1970,38 @@ hosp_info
 
 
 # ** Pre-cleaning ====
+# Traditional joins (non-probabilistic) are case-sensitive and require exact 
+# character matches between values in the two dataframes. To demonstrate some 
+# of the cleaning steps you might need to do before initiating a join, we will 
+# clean and align the linelist_mini and hosp_info datasets now.
+
+# *** Identify differences
+unique(linelist_mini$hospital)
+unique(hosp_info$hosp_name)
+# You can see that while some of the hospitals exist in both dataframes 
+# there are many differences in spelling.
+
+# *** Align values
+# We begin by cleaning the values in the hosp_info dataframe. 
+hosp_info <- hosp_info |> 
+    mutate(
+        hosp_name = case_when(
+            hosp_name == "military" ~ "Military Hospital",
+            hosp_name == "port" ~ "Port Hospital",
+            hosp_name == "St. Mark's" ~ "St. Mark's Maternity Hospital (SMMH)",
+            hosp_name == "central hospital" ~ "Central Hospital",
+            .default = hosp_name
+        )
+    )
+unique(hosp_info$hosp_name)
+# NOTE: Prior to a join, it is often easiest to convert a column to 
+# all lowercase or all uppercase.
+
+
+# 14.2 dplyr joins --------------------------------------------------------
+# The dplyr package offers several different join functions which are 
+# described below, with simple use cases.
+
 
 
 # TBC ####
