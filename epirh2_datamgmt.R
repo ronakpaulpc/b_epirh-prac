@@ -2002,6 +2002,9 @@ unique(hosp_info$hosp_name)
 # The dplyr package offers several different join functions which are 
 # described below, with simple use cases.
 
+# ** General syntax ====
+
+
 
 
 # TBC ####

@@ -91,6 +91,12 @@ linelist |>
 
 
 # ** base R - Printing results ====
+
+# 1. Get the exponentiated log odds ratio estimates and confidence intervals.
+# ERROR: NEED TO USE FUNCTIONAL FORM
+model <- glm(outcome ~ age_cat, family = "binomial", data = linelist) |>  
+    tidy(exponentiate = TRUE, conf.int = TRUE) |> 
+    mutate(across(where(is.numeric), round, digits = 2))
 # Warning message:
 #   There was 1 warning in `mutate()`.
 #   In argument: `across(.cols = where(is.numeric), .fns = round, digits = 2)`.
@@ -98,15 +104,53 @@ linelist |>
 #   The `...` argument of `across()` is deprecated as of dplyr 1.1.0.
 # Supply arguments directly to `.fns` through an anonymous function instead.
 
+# 3. Now we can bind the counts_table and the model results together 
+#    horizontally with bind_cols() (dplyr).
+# ERROR: WE ARE USING THE WRONG PLACEHOLDER. Base pipe(|>) uses "_" instead 
+# of "." in margrittr pipe (%>%).
+combined <- counts_table |> 
+    bind_cols(., model) |> 
+    select(term, 2:3, estimate, conf.low, conf.high, p.value) |> 
+    mutate(
+        across(
+            .cols = where(is.numeric),
+            .fns  = ~ round(.x, digits = 2)
+        )
+    )
+
 
 # ** base R - Looping multiple univariate models ====
-# ERROR: Wrong pipe operator.
+# MULTIPLE ERRORS: 
+# 1. WRONG PIPE PLACEHOLDER.
+# 2. .x object in not there.
+models <- explanatory_vars %>%       # begin with variables of interest
+    str_c("outcome ~ ", .) %>%         # combine each variable into formula ("outcome ~ variable of interest")
+    
+    # iterate through each univariate formula
+    map(                               
+        .f = ~glm(                       # pass the formulas one-by-one to glm()
+            formula = as.formula(.x),      # within glm(), the string formula is .x
+            family = "binomial",           # specify type of glm (logistic)
+            data = linelist)) %>%          # dataset
+    
+    # tidy up each of the glm regression outputs from above
+    map(
+        .f = ~tidy(
+            .x, 
+            exponentiate = TRUE,           # exponentiate 
+            conf.int = TRUE)) %>%          # return confidence intervals
+    
+    # collapse the list of regression outputs in to one data frame
+    bind_rows() %>% 
+    
+    # round all numeric columns
+    mutate(across(where(is.numeric), round, digits = 2))
 # explanatory_vars |> str_c("outcome ~ ", .)
 # Error: object '.' not found
 # NOTE: This error arises because of using the base pipe instead of the
 # margrittr pipe.
 
-# ERROR: Wrong description.
+# ERROR: WRONG DESCRIPTION.
 # The count table in univ_tab_base are actually crosstabs.  
 # Check the following code and compare: 
 # linelist |> tabyl(gender, outcome)

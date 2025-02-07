@@ -973,13 +973,15 @@ model <- glm(data = linelist, outcome ~ age_cat, family = "binomial") |>
       .fns    = ~ round(.x, digits = 2)
     )
   )
+# ERROR IN BOOK CODE. See "epirh_errors.R" for details.
 model
 # 2. Combine these model results with a table of counts.
 counts_table <- linelist |> tabyl(age_cat, outcome)
 counts_table
 # 3. Now we can bind the counts_table and the model results together 
-# horizontally with bind_cols() (dplyr).
-combined <- bind_cols(counts_table, model) |> 
+#    horizontally with bind_cols() (dplyr).
+combined <- counts_table |> 
+  bind_cols(... = _, model) |> 
   select(term, 2:3, estimate, conf.low, conf.high, p.value) |> 
   mutate(
     across(
@@ -988,7 +990,7 @@ combined <- bind_cols(counts_table, model) |>
     )
   )
 combined
-# NOTE: With bind_cols() the rows in the two data frames must be aligned 
+# NOTE: With bind_cols() the rows in the two dataframes must be aligned 
 # perfectly.
 
 # Now we print the dataframe nicely as an image using flextable.
@@ -998,12 +1000,19 @@ combined |> qflextable()
 # ** Looping multiple univariate models ====
 # Below we present a method using glm() and tidy().
 explanatory_vars
-str_c("outcome ~ ", explanatory_vars)
+# ERROR. See "epirh_errors.R" for details.
+# explanatory_vars |> str_c("outcome ~ ", .)
+explanatory_vars |> str_c("outcome ~ ", ... = _)
+
 # This approach uses map() from the package purrr to iterate.
-models <- str_c("outcome ~ ", explanatory_vars) |> 
-  # univariate regression model for each formula
+models <- explanatory_vars |> 
+  
+  # combine each var into formula
+  str_c("outcome ~ ", ... = _) |> 
+  
+  # running univariate regression model for each formula 
   map(
-    \(x) glm(data = linelist, formula = as.formula(x), family  = "binomial")
+    \(x) glm(data = linelist, formula = as.formula(x), family = "binomial")
   ) |> 
   
   # tidy up the glm regression output
@@ -1011,15 +1020,36 @@ models <- str_c("outcome ~ ", explanatory_vars) |>
     \(x) tidy(x, exponentiate = T, conf.int = T)
   ) |> 
   
-  # collapse list of regression outputs into one dataframe
+  # collapse the list of regression outputs into one dataframe
   bind_rows() |> 
   
-  # format the regression output
+  # round off all numeric columns
   mutate(across(
     .cols = where(is.numeric),
-    .fns  = ~ round(.x, digits = 2)
+    .fns = \(x) round(x, digits = 2)
   ))
 models
+# # ALTLY, WE COULD DO
+# models <- str_c("outcome ~ ", explanatory_vars) |> 
+#   # univariate regression model for each formula
+#   map(
+#     \(x) glm(data = linelist, formula = as.formula(x), family  = "binomial")
+#   ) |> 
+#   
+#   # tidy up the glm regression output
+#   map(
+#     \(x) tidy(x, exponentiate = T, conf.int = T)
+#   ) |> 
+#   
+#   # collapse list of regression outputs into one dataframe
+#   bind_rows() |> 
+#   
+#   # format the regression output
+#   mutate(across(
+#     .cols = where(is.numeric),
+#     .fns  = ~ round(.x, digits = 2)
+#   ))
+
 
 # As before, we can create a counts table from the linelist for each 
 # explanatory variable, bind it to models, and make a nice table.
@@ -1059,8 +1089,7 @@ univ_tab_base <- explanatory_vars |>
     }
   )
 univ_tab_base
-# ERROR NOT RESOLVED
-# ERROR ####
+# ERROR UNRESOLVED ####
 
 
 # ** gtsummary package ====
