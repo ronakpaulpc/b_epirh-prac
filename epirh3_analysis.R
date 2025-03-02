@@ -1333,6 +1333,30 @@ final_mv_reg |>
 
 
 # 26.1 Preparation - packages ---------------------------------------------
+# The "sitrep" pkg used here is not available on CRAN. We need to install it 
+# from Github.
+devtools::install_github("R4EPI/sitrep")
+# Installing other packages
+install.packages("ggforce")
+
+# Let's load the required packages for analysis.
+library(easypackages)
+libraries(
+  "rio",
+  "here",
+  "tidyverse",
+  "tsibble",
+  "survey",
+  "srvyr",
+  "gtsummary",
+  "apyramid",
+  "patchwork",
+  "ggforce",
+  "sitrep"
+)
+
+
+# 26.2 Preparation - Datasets ---------------------------------------------
 
 
 
