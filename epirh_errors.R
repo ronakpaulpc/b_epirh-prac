@@ -79,6 +79,14 @@ linelist |>
 # C19 - Univariate and multivariable regression ---------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+# 19.1 Preparation --------------------------------------------------------
+
+# ** base R - Linear regression ====
+# SUGGESTION: Prepare the data for logistic regression model in a separate 
+# object called "linelist_glm". Not doing so leads to error as linear 
+# regression models use the same linelist dataset with different set of vars.
+
+
 # 19.2 Univariate ---------------------------------------------------------
 
 # ** base R - Linear regression ====

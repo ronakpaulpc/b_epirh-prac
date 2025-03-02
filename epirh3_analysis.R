@@ -843,6 +843,7 @@ libraries(
 
 
 # ** Import data ====
+# This data will be used for running linear regression models.
 linelist <- import(here("data_prac", "linelist_cleaned.rds"))
 
 
@@ -856,9 +857,9 @@ explanatory_vars
 # *** Convert to 1's and 0's
 # Below we convert the explanatory columns from “yes”/“no”, “m”/“f”, 
 # and “dead”/“alive” to 1 / 0, to cooperate with the expectations of 
-# logistic regression models.
-# convert all dichotomous variables to 0/1
-linelist <- linelist |> 
+# logistic regression models. In short, we convert all dichotomous 
+# variables to 0/1.
+linelist_glm <- linelist |> 
   mutate(
     across(
       .cols = all_of(c(explanatory_vars, "outcome")),
@@ -872,13 +873,13 @@ linelist <- linelist |>
 
 # *** Drop rows with missing values
 # To drop rows with missing values, can use the tidyr function drop_na(). 
-# However, we only want to do this for rows that are missing values in 
+# However, we only want to do this for rows that have missing values in 
 # the columns of interest.
-# add in age_category to the explanatory vars
+# Add in age_category to the explanatory vars
 explanatory_vars <- c(explanatory_vars, "age_cat")
 explanatory_vars
-# drop rows with missing information for variables of interest
-linelist <- linelist |>
+# Drop rows with missing information for variables of interest
+linelist_glm <- linelist_glm |>
   select(all_of(explanatory_vars), outcome) |> 
   drop_na()
 
@@ -893,6 +894,7 @@ linelist <- linelist |>
 # The function lm() performs linear regression, assessing the relationship 
 # between numeric response and explanatory variables that are assumed to 
 # have a linear relationship.
+
 # NOTE: The Linear regression section uses the unmodified linelist dataset.
 # linelist <- import(here("data_prac", "linelist_cleaned.rds"))
 
@@ -943,14 +945,14 @@ ggplot(data = linelist, aes(x = age, y = ht_cm)) +
 # and the outcome of death (coded as 1 in the Preparation section).
 
 # NOTE: Modify the linelist data in Preparation section before using.
-model <- glm(data = linelist, outcome ~ age_cat, family = "binomial")
+model <- glm(data = linelist_glm, outcome ~ age_cat, family = "binomial")
 summary(model)
 # NOTE: The estimates provided are the log-odds and that the baseline level 
 # is the first factor level of age_cat (“0-4”).
 
 # To alter the baseline level of a given var, ensure the col is class Factor 
 # and move the desired level to the first position with fct_relevel().
-model_2 <- linelist |> 
+model_2 <- linelist_glm |> 
   mutate(
     age_cat = fct_relevel(age_cat, "20-29", after = 0)
   ) |> 
@@ -965,30 +967,26 @@ tidy(model_2)
 
 # Here we demonstrate how to combine model outputs with a table of counts.
 # 1. Get the exponentiated log odds ratio estimates and confidence intervals.
-model <- glm(data = linelist, outcome ~ age_cat, family = "binomial") |> 
+model <- glm(data = linelist_glm, outcome ~ age_cat, family = "binomial") |> 
   tidy(exponentiate = T, conf.int = T) |> 
-  mutate(
-    across(
-      .cols   = where(is.numeric),
-      .fns    = ~ round(.x, digits = 2)
-    )
-  )
+  mutate(across(
+    .cols   = where(is.numeric),
+    .fns    = ~ round(.x, digits = 2)
+  ))
 # ERROR IN BOOK CODE. See "epirh_errors.R" for details.
 model
 # 2. Combine these model results with a table of counts.
-counts_table <- linelist |> tabyl(age_cat, outcome)
+counts_table <- linelist_glm |> tabyl(age_cat, outcome)
 counts_table
 # 3. Now we can bind the counts_table and the model results together 
 #    horizontally with bind_cols() (dplyr).
 combined <- counts_table |> 
   bind_cols(... = _, model) |> 
   select(term, 2:3, estimate, conf.low, conf.high, p.value) |> 
-  mutate(
-    across(
-      .cols = where(is.numeric),
-      .fns  = ~ round(.x, digits = 2)
-    )
-  )
+  mutate(across(
+    .cols = where(is.numeric),
+    .fns  = ~ round(.x, digits = 2)
+  ))
 combined
 # NOTE: With bind_cols() the rows in the two dataframes must be aligned 
 # perfectly.
@@ -1012,7 +1010,7 @@ models <- explanatory_vars |>
   
   # running univariate regression model for each formula 
   map(
-    \(x) glm(data = linelist, formula = as.formula(x), family = "binomial")
+    \(x) glm(data = linelist_glm, formula = as.formula(x), family = "binomial")
   ) |> 
   
   # tidy up the glm regression output
@@ -1054,49 +1052,71 @@ models
 # As before, we can create a counts table from the linelist for each 
 # explanatory variable, bind it to models, and make a nice table.
 univ_tab_base <- explanatory_vars |> 
+  # create count of multiple variables
   map(
-    function(x) {
+    function(.x) {
       linelist |> 
-        group_by(outcome) |>
-        count({{x}}) |> 
-        pivot_wider(
-          names_from = outcome,
-          values_from = n
-        ) |> 
-        drop_na() |> 
-        # rename variable by its position
-        rename("variable" = 1)
+        group_by(outcome) |> 
+        count(.data[[.x]]) |> 
+        pivot_wider(names_from = outcome, values_from = n) |> 
+        drop_na(.data[[.x]]) |> 
+        rename("variable" = .x) |> 
+        mutate(variable = as.character(variable))
     }
-  ) |>
+  ) |> 
   
-  # collapse list of output into one dataframe
-  bind_rows() |> mutate(variable = as.character(variable))
+  # collapse the list of count outputs into one dataframe
+  bind_rows() |> 
   
-  # merge with regression output
-  bind_cols(models)
-
-# ERROR: bind_cols() gives error.
-# SOL: Use join function. 
+  # merge with the outputs of the regression
+  bind_cols(... = _, models) |> 
+  
+  # select only the required columns
+  select(term, 2:3, estimate, conf.low, conf.high, p.value) |> 
+  
+  # round decimal places
+  mutate(across(
+    where(is.numeric),
+    \(x) round(x, digits = 2)
+  ))
 univ_tab_base
+# ERROR RESOLVED #
 
-# TRIAL
-univ_tab_base <- explanatory_vars |> 
-  
-  map(
-    function(x) {
-      linelist |> 
-        tabyl(x, outcome)
-    }
-  )
-univ_tab_base
-# ERROR UNRESOLVED ####
+# # BOOK CODE
+# univ_tab_base <- explanatory_vars %>% 
+#   map(.f = 
+#         ~{linelist %>%
+#             group_by(outcome) %>%
+#             count(.data[[.x]]) %>%
+#             pivot_wider(
+#               names_from = outcome,
+#               values_from = n) %>% 
+#             drop_na(.data[[.x]]) %>%
+#             rename("variable" = .x) %>%
+#             mutate(variable = as.character(variable))}
+#   ) %>% 
+#   
+#   ## collapse the list of count outputs in to one data frame
+#   bind_rows() %>% 
+#   
+#   ## merge with the outputs of the regression 
+#   bind_cols(., models) %>% 
+#   
+#   ## only keep columns interested in 
+#   select(term, 2:3, estimate, conf.low, conf.high, p.value) %>% 
+#   
+#   ## round decimal places
+#   mutate(across(
+#     where(is.numeric), \(x) round(x, digits = 2)
+#   ))
+# univ_tab_base
 
 
 # ** gtsummary package ====
 # Below we present the use of tbl_uvregression() from the gtsummary package.
 # We select only the necessary columns from the linelist and pipe them 
 # into tbl_uvregression().
-univ_tab <- linelist |> 
+univ_tab <- linelist_glm |> 
   select(all_of(explanatory_vars), outcome) |> 
   tbl_uvregression(
     method = glm,
@@ -1114,6 +1134,8 @@ univ_tab
 
 
 # 19.4 Multivariable ------------------------------------------------------
+# START FROM HERE ####
+
 # For multivariable analysis, we again present two approaches:
 # 1. glm() and tidy().
 # 2. gtsummary package.
@@ -1299,6 +1321,21 @@ final_mv_reg |>
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # C26 - Survey analysis ---------------------------------------------------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Here we learn about using r packages for analyzing survey data.
+# Most survey packages in R rely on the survey package for doing weighted 
+# analysis. We will use survey as well as srvyr (a wrapper for survey 
+# allowing for tidyverse-style coding) and gtsummary (a wrapper for survey 
+# allowing for publication ready tables). 
+# While the original survey package does not allow for tidyverse-style coding
+# it does have the added benefit of allowing for survey-weighted generalised 
+# linear models. We will also demonstrate using a function from the sitrep 
+# package to create sampling weights.
+
+
+# 26.1 Preparation - packages ---------------------------------------------
+
+
+
 
 
 # TBC ####
