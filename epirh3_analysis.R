@@ -1357,8 +1357,40 @@ libraries(
 
 
 # 26.2 Preparation - Datasets ---------------------------------------------
+# The example datasets used in this section are:
+##  fictional mortality survey data.
+##  fictional population counts for the survey area.
+##  data dictionary for the fictional mortality survey data.
+# The fictional dataset was produced as part of the “R4Epis” project. This
+# is all based off data collected using KoboToolbox, which is a data 
+# collection software based off Open Data Kit.
 
 
+# ** Load data ====
+# First we import the survey data
+survey_data <- import(here("data_prac", "survey_data.xlsx"))
+glimpse(survey_data)
+# Then we import the dictionary of the survey data
+survey_dict <- import(here("data_prac", "survey_dict.xlsx"))
+glimpse(survey_dict)
+# Next we import the population data
+population <- import(here("data_prac", "population.xlsx"))
+glimpse(population)
+
+# For cluster surveys you may want to add survey weights at the cluster level.
+# You will need to have one column with a cluster identifier which matches 
+# your survey data, and another column with the number of households in 
+# each cluster.
+# Next, we define the number of households in each cluster.
+cluster_counts <- tibble(
+  cluster = c("village_1", "village_2", "village_3", "village_4", "village_5", 
+              "village_6", "village_7", "village_8", "village_9", "village_10"),
+  households = c(700, 400, 600, 500, 300, 800, 700, 400, 500, 500)
+)
+cluster_counts
+
+
+# ** Clean data ====
 
 
 
